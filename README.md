@@ -64,4 +64,4 @@ out_put_path is the path which is used for output.
 
 3)Output.
 
-ScaffoldSet.fa is the file which includes scaffolds produced by LNSG.
+ScaffoldSet.fa is the file which includes scaffolds produced by BOSS.
