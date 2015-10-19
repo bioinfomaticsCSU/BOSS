@@ -35,10 +35,33 @@ LNSG is written C++ and therefore will require a machine with GNU C++ pre-instal
 
 Create a main directory (eg:LNSG). Copy all source code to this directory.
 
+Type "g++ main.cpp scaffoldgraph.cpp scaffolding.cpp -o scaffold ./lp/liblpsolve55.a -lm -ldl -I include/ -L lib/ -lbamtools" 
+
 2)Running.
 
 Run command line: 
 
-g++ main.cpp -o lnsg -lpthread 
+"scaffold contigs.fa bamfile read_length insert_size std min_weight min_number min_cov is_paired_end out_put_path"
+
+contigs.fa is the file includes contigs produced by one assembler.
+
+read_length is the length of read.
+
+insert_size is the insert size of read library.
+
+std is standard deviation of insert size (default: 0.1*insert_size).
+
+min_weight is one cutoff for removing suprious edgs in scaffold graph (default: 0.3).
+
+min_number is the minimum number of links between contigs (default:5).
+
+min_cov is the coverage cutoff, when sequence region's coverage is greater than min_cov, it will be regarded as repetitive region. 
+
+is_paired_end is 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired.
+
+out_put_path is the path which is used for output. 
+
 
 3)Output.
+
+ScaffoldSet.fa is the file which includes scaffolds produced by LNSG.
