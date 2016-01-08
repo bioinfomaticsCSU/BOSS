@@ -100,6 +100,34 @@ typedef struct InsertSize{
     }
 }InsertSize;
 
+typedef struct SubGraphNode{
+    long int index;
+    SubGraphNode * next;
+    SubGraphNode(){
+        index = -1;
+        next = NULL;
+    }
+}SubGraphNode;
+
+typedef struct SubGraph{
+    SubGraphNode * startNode;
+    long int left;
+    long int right;
+    long int weight;
+    double fitNumber;
+    long int mateIndex;
+    SubGraph * next;
+    SubGraph(){
+        left = 0;
+        right = 0;
+        weight = 0;
+        mateIndex = -1;
+        fitNumber = 0;
+        startNode = NULL;
+        next = NULL;
+    }
+}SubGraph;
+
 ScaffoldSet * InitScaffoldSet(ContigSet * contigSet, long int contigCount);
 
 
@@ -114,7 +142,7 @@ void OutPutScaffoldTag(ScaffoldSet * scaffoldSet);
 void OutPutScaffoldTag(ScaffoldSet * scaffoldSet, char * result);
 void OutPutScaffoldSet(ScaffoldSet * scaffoldSet, ContigSet * contigSet, long int contigCount, char * result); 
 
-ScaffoldSet * OptimizeScaffoldSet(ScaffoldSet * scaffoldSet, ScaffoldGraph * scaffoldGraph, long int & contigCount, long int realContigCount, long int * contigLength, long int insertsize, long int std, long int lambda);
+ScaffoldSet * OptimizeScaffoldSet(ContigSet * contigSet, ScaffoldSet * scaffoldSet, ScaffoldGraph * scaffoldGraph, long int & contigCount, long int realContigCount, long int * contigLength, long int insertsize, long int std, long int lambda);
 
 BFSNode * InsertShortContigOfTail(ScaffoldGraph * scaffoldGraph, ContigSequence * previousBfsContigSequence, ContigSequence * bfsContigSequence, ScaffoldSet * curretScaffold, bool * visited, long int contigCutOff);
 BFSNode * InsertShortContigOfHead(ScaffoldGraph * scaffoldGraph, ContigSequence * previousBfsContigSequence, ContigSequence * bfsContigSequence, ScaffoldSet * currentScaffold, bool * visited, long int contigCutOff);
@@ -124,6 +152,7 @@ int BFSScaffolding(ScaffoldGraph * scaffoldGraph, ScaffoldSet * scaffoldSet, lon
 
 int AddShortContigToScaffoldSet(ScaffoldSet * scaffoldSet, long int contigCount, bool * index);
 
-long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, long int min, long int max);
-long int * IterativeDetermineOrderOfContigs(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, long int * tempContigOrder, long int * contigPosition, bool ** fixIndex, long int insertsize, long int std, long int lambda, double minScore);
+long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, bool ** fixIndex, double minScore);
+long int * IterativeDetermineOrderOfContigs(ContigSet * contigSet, ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, long int * tempContigOrder, long int * contigPosition, bool ** fixIndex, long int insertsize, long int std, long int lambda, double minScore);
+
 #endif

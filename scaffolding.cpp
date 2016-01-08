@@ -16,6 +16,7 @@
 #include "lp/lp_lib.h"
 
 using namespace std;
+long int fileIndex = 0;
 
 long int allContigLength = 0;
 
@@ -1559,10 +1560,14 @@ int InsertShortContigInScaffoldSet(ScaffoldGraph * scaffoldGraph, ScaffoldSet * 
 
 }
 
+long int DetermineOrientationOfContigsHeuristic(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, bool ** fixIndex, double minScore){
+
+}
 
 
 
-long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, long int min, long int max){
+
+long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, bool ** fixIndex, double minScore){
     
     long int i = 0;
     long int j = 0;
@@ -1632,15 +1637,13 @@ long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int c
             }
             while(tempEdge!=NULL){
                 
-                if(scaffoldGraph[i].length<min || scaffoldGraph[tempEdge->contigIndex].length<min){
+                bool token = false;
+                if(tempEdge->fitNumber>=minScore && fixIndex[i][tempEdge->contigIndex]==true){
+                    token = true;
+                }
+                if(tempEdge->fitNumber<minScore){
                     tempEdge = tempEdge->next;
                     continue;
-                }
-                
-                bool token = false;
-                
-                if(scaffoldGraph[i].length >= max && max!=-1 && scaffoldGraph[tempEdge->contigIndex].length >= max){
-                    token = true;
                 }
                 
                 if(index[i][tempEdge->contigIndex] == false && index[tempEdge->contigIndex][i] == false){
@@ -1658,7 +1661,11 @@ long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int c
                                 exit(0);
                             }
                         }else{
-                            if(!add_constraintex(lp, j, row, colno, LE, 0)){
+                            if(!add_constraintex(lp, j, row, colno, LE, 1)){
+                                printf("couldn't add_constraintex");
+                                exit(0);
+                            }
+                            if(!add_constraintex(lp, j, row, colno, GE, 1)){
                                 printf("couldn't add_constraintex");
                                 exit(0);
                             }
@@ -1676,12 +1683,8 @@ long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int c
                                 printf("couldn't add_constraintex");
                                 exit(0);
                             }
-                        }else{
-                            if(!add_constraintex(lp, j, row, colno, LE, 0)){
-                                printf("couldn't add_constraintex");
-                                exit(0);
-                            }
                         }
+                        
                         constraintNumber = constraintNumber+2;
                         
                     }else{
@@ -1702,6 +1705,10 @@ long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int c
                                 printf("couldn't add_constraintex");
                                 exit(0);
                             }
+                            if(!add_constraintex(lp, j, row, colno, GE, 0)){
+                                printf("couldn't add_constraintex");
+                                exit(0);
+                            }
                         }
                         
                     
@@ -1714,11 +1721,6 @@ long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int c
                             colno[j] = contigCount + p; 
                             row[j++] = c;
                             if(!add_constraintex(lp, j, row, colno, LE, c)){
-                                printf("couldn't add_constraintex");
-                                exit(0);
-                            }
-                        }else{
-                            if(!add_constraintex(lp, j, row, colno, LE, 0)){
                                 printf("couldn't add_constraintex");
                                 exit(0);
                             }
@@ -1771,28 +1773,12 @@ long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int c
         printf("couldn't set_obj_fnex");
         exit(0);
     }
-    cout<<"lpsover_orientation_start"<<endl;
+
     set_bb_depthlimit(lp, 10);
     set_maxim(lp);
-    
     set_scaling(lp, 128);  
-    
     ret = solve(lp);
-    cout<<"lpsover_orientation_end"<<endl;
-    if(ret == 0 || ret == 1){
-        
-    }else{
-
-        set_break_at_first(lp,true);
-        cout<<"lpsover_orientation_tt"<<endl;
-        set_bb_depthlimit(lp, 10);
-        
-        ret = solve(lp);
-        cout<<"lpsover_orientation_tttttt"<<endl;
-        if(!(ret == 0 || ret == 1)){
-            return -1;
-        }
-    }
+    
     REAL * pv = new REAL[constraintNumber + contigCount + edgeNumber + 1];
     get_primal_solution(lp,pv);
 
@@ -1800,13 +1786,18 @@ long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int c
     long int result = 0;
     for(i=contigCount+constraintNumber+1;i<constraintNumber+contigCount+p+1;i++){
         if(pv[i] < 1){
-            DeleteSpecialScaffoldEdge(scaffoldGraph, edgeLeftNode[i-contigCount-constraintNumber-1], edgeRightNode[i-contigCount-constraintNumber-1]);
-            DeleteSpecialScaffoldEdge(scaffoldGraph, edgeRightNode[i-contigCount-constraintNumber-1], edgeLeftNode[i-contigCount-constraintNumber-1]);
-            result++;
+            if(minScore<0.11){
+                DeleteSpecialScaffoldEdge(scaffoldGraph, edgeLeftNode[i-contigCount-constraintNumber-1], edgeRightNode[i-contigCount-constraintNumber-1]);
+                DeleteSpecialScaffoldEdge(scaffoldGraph, edgeRightNode[i-contigCount-constraintNumber-1], edgeLeftNode[i-contigCount-constraintNumber-1]);
+                result++;
+            }
+        }else{
+            fixIndex[edgeRightNode[i-contigCount-constraintNumber-1]][edgeLeftNode[i-contigCount-constraintNumber-1]] = true;
+            fixIndex[edgeLeftNode[i-contigCount-constraintNumber-1]][edgeRightNode[i-contigCount-constraintNumber-1]] = true;
         }
     }
     
-    for(i=constraintNumber+1;i<contigCount+constraintNumber+1;i++){
+    for(i=constraintNumber+1;i<contigCount+constraintNumber+1 && minScore<0.11;i++){
         contigOrientation[i-constraintNumber-1] = pv[i];
     }
     
@@ -1849,7 +1840,7 @@ void SetGapDistance(ScaffoldGraph * scaffoldGraph, long int first, long int seco
 }
 
 
-long int * IterativeDetermineOrderOfContigs(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, long int * tempContigOrder, long int * contigPosition, bool ** fixIndex, long int insertsize, long int std, long int lambda, double minScore){
+long int * IterativeDetermineOrderOfContigs(ContigSet * contigSet, ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, long int * tempContigOrder, long int * contigPosition, bool ** fixIndex, long int insertsize, long int std, long int lambda, double minScore){
     
     
     long int i = 0;
@@ -2094,13 +2085,13 @@ long int * IterativeDetermineOrderOfContigs(ScaffoldGraph * scaffoldGraph, long 
     get_primal_solution(lp,pv);
     
     for(i=0;i<contigCount;i++){
-        if(contigVisited[i] == true){
-            contigPosition[i] = pv[1+constraintNumber+i];
-        }else{
-            contigPosition[i] = -1;
-        }
+
+        contigPosition[i] = pv[1+constraintNumber+i];
     }
     
+    long int trueNumber = 0;
+    long int realTrueNumber = 0;
+
     for(i=contigCount+constraintNumber+1;i<contigCount+constraintNumber+p+1;i++){
         if(pv[i] < 1){
             long int d = pv[1+constraintNumber+edgeRightNode[i-contigCount-constraintNumber-1]] - pv[1+constraintNumber+edgeLeftNode[i-contigCount-constraintNumber-1]] - scaffoldGraph[edgeLeftNode[i-contigCount-constraintNumber-1]].length;
@@ -2114,7 +2105,6 @@ long int * IterativeDetermineOrderOfContigs(ScaffoldGraph * scaffoldGraph, long 
 
     }
     
-    
     for(i=0;i<contigCount;i++){
         delete [] index[i];
     }
@@ -2126,6 +2116,341 @@ long int * IterativeDetermineOrderOfContigs(ScaffoldGraph * scaffoldGraph, long 
     delete [] gapDistance;
     delete [] pv;
     delete_lp(lp);
+    
+}
+
+
+
+SubGraph * ReachableNode(ScaffoldGraph * scaffoldGraph, bool * contigOrientation, long int contigCount, int inOrOutIndex){
+    long int i = 0;
+    long int j = 0;
+    
+    SubGraph * reachableNodeList = new SubGraph[contigCount];
+    SubGraphNode * tempNode = NULL;
+    SubGraphNode * lastNode = NULL;
+    
+    ScaffoldEdge * tempEdge = NULL;
+    bool * visited = new bool[contigCount];
+    
+    for(i = 0; i<contigCount; i++){
+        
+        if(contigOrientation[i] == inOrOutIndex){
+            tempEdge = scaffoldGraph[i].outLink;
+        }else{
+            tempEdge = scaffoldGraph[i].inLink;
+        }
+        
+        for(long int t = 0; t<contigCount; t++){
+            visited[t] = false;
+        }
+        
+        j = 0;
+        tempNode = NULL;
+        while(tempNode!=NULL || (tempEdge != NULL && j==0) ){
+            
+            if(tempNode != NULL){
+                if(contigOrientation[tempNode->index] == inOrOutIndex){
+                    tempEdge = scaffoldGraph[tempNode->index].outLink;
+                }else{
+                    tempEdge = scaffoldGraph[tempNode->index].inLink;
+                }
+                
+                if(tempEdge == NULL){
+                    tempNode = tempNode->next;
+                    j++;
+                    continue;
+                }
+            }
+            
+            
+            ScaffoldEdge * temp = tempEdge;
+            long int adjacentNodeCount = 0;
+            while(temp!=NULL){
+                adjacentNodeCount++;
+                temp = temp->next;
+            }
+
+            long int * gapDistance = new long int[adjacentNodeCount];
+            long int * nodeIndex = new long int[adjacentNodeCount];
+            temp = tempEdge;
+            long int t = 0;
+            while(temp!=NULL){
+                gapDistance[t] = temp->gapDistance;
+                nodeIndex[t] = temp->contigIndex;
+                temp = temp->next;
+                t++;
+            }
+            long int p = 0;
+            for(t=0;t<adjacentNodeCount-1;t++){
+                for(p=t+1;p<adjacentNodeCount;p++){
+                    if(gapDistance[t]>gapDistance[p]){
+                        
+                        long int tempGap = gapDistance[t];
+                        gapDistance[t] = gapDistance[p];
+                        gapDistance[p] = tempGap;
+                        
+                        tempGap = nodeIndex[t];
+                        nodeIndex[t] = nodeIndex[p];
+                        nodeIndex[p] = tempGap;
+                        
+                    }
+                }
+            }
+            
+            t = 0;
+            if(tempNode == NULL){
+
+                if(adjacentNodeCount>0){
+                    reachableNodeList[i].startNode = new SubGraphNode;
+                    reachableNodeList[i].startNode->index = nodeIndex[0];
+                    visited[nodeIndex[0]] = true;
+                    lastNode = reachableNodeList[i].startNode;
+                    tempNode = reachableNodeList[i].startNode;
+
+                }
+                t = 1;
+            }
+            if(t == 0){
+                tempNode = tempNode->next;
+            }
+            for(t = t;t<adjacentNodeCount;t++){
+                if(visited[nodeIndex[t]] == true){
+                    continue;
+                }
+                lastNode->next = new SubGraphNode;
+                lastNode->next->index = nodeIndex[t];
+                lastNode = lastNode->next;
+                visited[nodeIndex[t]] = true;
+            }
+            j++;
+            
+            delete [] gapDistance;
+            delete [] nodeIndex;
+        }
+        
+        
+    }
+    
+    return reachableNodeList;
+    
+
+}
+
+SubGraphNode * DFS(ScaffoldGraph * scaffoldGraph, long int contigIndex, SubGraphNode * subGraphNode, bool * contigOrientation, bool * visited){
+    visited[contigIndex] = true;
+    ScaffoldEdge * tempEdge = NULL;
+    for(int i = 0; i<2;i++){
+        if(i==0){
+            tempEdge = scaffoldGraph[contigIndex].inLink;
+        }else{
+            tempEdge = scaffoldGraph[contigIndex].outLink;
+        }
+        while(tempEdge!=NULL){
+            if(visited[tempEdge->contigIndex] == false){
+                subGraphNode->next = new SubGraphNode;
+                subGraphNode = subGraphNode->next;
+                subGraphNode->index = tempEdge->contigIndex;
+                subGraphNode = DFS(scaffoldGraph, tempEdge->contigIndex, subGraphNode, contigOrientation, visited);
+            }
+            tempEdge = tempEdge->next;
+        }
+    }
+    return subGraphNode;
+}
+
+SubGraph * DFSTranverseScaffoldGraph(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation){
+    
+    long int i = 0;
+    long int j = 0;
+    
+    bool * visited = new bool[contigCount];
+    for(i = 0; i<contigCount; i++){
+        visited[i] = false;
+    }
+    
+    SubGraph * subGraph = NULL;
+    SubGraph * firstSubGraph = NULL;
+    
+    
+    long int connectedSubGraph = 0;
+    
+    for(i = 0; i<contigCount; i++){
+        if(visited[i] == false){
+            if(subGraph == NULL){
+                subGraph = new SubGraph;
+                firstSubGraph = subGraph;
+            }else{
+                subGraph->next =new SubGraph;
+                subGraph = subGraph->next;
+            }
+            subGraph->startNode = new SubGraphNode;
+            subGraph->startNode->index = i;
+            DFS(scaffoldGraph, i, subGraph->startNode, contigOrientation, visited);
+            connectedSubGraph++;
+        }
+    }
+    long int subGraphCount = 0;
+    SubGraph * first = firstSubGraph;
+    while(firstSubGraph!=NULL){
+        subGraphCount++;
+        firstSubGraph = firstSubGraph->next;
+    }
+    return first;
+}
+
+long int RemovePositionOverlap(ScaffoldGraph * scaffoldGraph, SubGraph * subGraph, SubGraph * reachableNode, long int contigCount, long int * contigPosition){
+    
+    
+    long int i = 0;
+    long int j = 0;
+    long int p = 1;
+    long int c = 100000;
+    
+    bool ** index = new bool*[contigCount];
+    for(i=0;i<contigCount;i++){
+        index[i] = new bool[contigCount];
+        for(j=0;j<contigCount;j++){
+            index[i][j] = false;
+        }   
+    }
+    
+    bool ** overlapIndex = new bool*[contigCount];
+    for(i=0;i<contigCount;i++){
+        overlapIndex[i] = new bool[contigCount];
+        for(j=0;j<contigCount;j++){
+            overlapIndex[i][j] = false;
+        }   
+    }
+    
+    
+    long int edgeNumber = 0;
+    long int constraintNumber = 0;
+    ScaffoldEdge * tempEdge = NULL;
+    
+    for(i=0;i<contigCount;i++){
+        tempEdge = scaffoldGraph[i].outLink;
+        while(tempEdge!=NULL){
+            edgeNumber++;
+            tempEdge = tempEdge->next;
+        }
+        tempEdge = scaffoldGraph[i].inLink;
+        while(tempEdge!=NULL){
+            edgeNumber++;
+            tempEdge = tempEdge->next;
+        }
+
+    }
+    
+    
+    edgeNumber = edgeNumber/2;
+    
+    constraintNumber = 0;
+    
+    long int positionOverlapCount = 0;
+
+    while(subGraph!=NULL){
+        SubGraphNode * tempNode = subGraph->startNode;
+        SubGraphNode * secondNode = subGraph->startNode;
+        while(tempNode!=NULL){
+            secondNode = subGraph->startNode;
+            while(secondNode!=NULL){
+                if(secondNode->index == tempNode->index){
+                    secondNode = secondNode->next;
+                    continue;
+                }
+                i = tempNode->index;
+                j = secondNode->index;     
+                
+                if(contigPosition[i] + scaffoldGraph[i].length > contigPosition[j] 
+                    && contigPosition[i] < contigPosition[j] && contigPosition[j]!=-1){
+                    long int overlapLength = 0;
+                    if(contigPosition[i] + scaffoldGraph[i].length < contigPosition[j] + scaffoldGraph[j].length){
+                        overlapLength = contigPosition[i] + scaffoldGraph[i].length - contigPosition[j];
+                    }else{
+                        overlapLength = scaffoldGraph[j].length;
+                    }
+                    
+                    double a = (double)(overlapLength)/(double)(scaffoldGraph[i].length);
+                    double b = (double)(overlapLength)/(double)(scaffoldGraph[j].length);
+
+                    if(a>0.3 || b>0.3){
+                        if(overlapIndex[i][j] == false){
+                            positionOverlapCount++;
+                            overlapIndex[i][j] = true;
+                            
+                            SubGraphNode * tempReachableNode = reachableNode[i].startNode;
+                            SubGraphNode * tempReachableNode1 = reachableNode[j].startNode;
+                            long int previusReachableNodeIndex = i;
+                            long int previusReachableNodeIndex1 = j;
+                            bool reachIndex = false;
+                            
+                            while(tempReachableNode != NULL){
+                                tempReachableNode1 = reachableNode[j].startNode;
+                                previusReachableNodeIndex1 = j;
+                                while(tempReachableNode1 != NULL){
+                                    if(tempReachableNode->index == tempReachableNode1->index){
+                                        reachIndex = true;
+                                        break;
+                                    }
+                                    previusReachableNodeIndex1 = tempReachableNode1->index;
+                                    tempReachableNode1 = tempReachableNode1->next;
+                                }
+                                if(reachIndex == true){
+                                    break;
+                                }
+                                previusReachableNodeIndex = tempReachableNode->index;
+                                tempReachableNode = tempReachableNode->next;
+                                
+                            }
+                            
+                            double score = 0;
+                            double score1 = 0;
+                            
+                            if(reachIndex == true){
+                                
+                                long int currentReachableNodeIndex = tempReachableNode->index;
+                                tempEdge = scaffoldGraph[currentReachableNodeIndex].outLink;
+                                while(tempEdge!=NULL){
+                                    if(tempEdge->contigIndex == previusReachableNodeIndex){
+                                        score = tempEdge->fitNumber;
+                                    }
+                                    if(tempEdge->contigIndex == previusReachableNodeIndex1){
+                                        score1 = tempEdge->fitNumber;
+                                    }
+                                    tempEdge = tempEdge->next;
+                                }
+                                tempEdge = scaffoldGraph[currentReachableNodeIndex].inLink;
+                                while(tempEdge!=NULL){
+                                    if(tempEdge->contigIndex == previusReachableNodeIndex){
+                                        score = tempEdge->fitNumber;
+                                    }
+                                    if(tempEdge->contigIndex == previusReachableNodeIndex1){
+                                        score1 = tempEdge->fitNumber;
+                                    }
+                                    tempEdge = tempEdge->next;
+                                }
+                                
+                                
+                                
+                                if(score > score1){
+                                    DeleteSpecialScaffoldEdge(scaffoldGraph, currentReachableNodeIndex, previusReachableNodeIndex1);
+                                    DeleteSpecialScaffoldEdge(scaffoldGraph, previusReachableNodeIndex1, currentReachableNodeIndex);
+                                }else{
+                                    DeleteSpecialScaffoldEdge(scaffoldGraph, currentReachableNodeIndex, previusReachableNodeIndex);
+                                    DeleteSpecialScaffoldEdge(scaffoldGraph, previusReachableNodeIndex, currentReachableNodeIndex);
+                                }
+                            }
+                            
+                        }
+                    }
+                }    
+
+                secondNode = secondNode->next;
+            }
+            tempNode = tempNode->next;
+        }
+        subGraph = subGraph->next;
+    }
     
 }
 
@@ -2504,7 +2829,33 @@ int AddShortContigToScaffoldSet(ScaffoldSet * scaffoldSet, long int contigCount,
     
 }
 
-ScaffoldSet * OptimizeScaffoldSet(ScaffoldSet * scaffoldSet, ScaffoldGraph * scaffoldGraph, long int & contigCount, long int realContigCount, long int * contigLength, long int insertsize, long int std, long int lambda){
+void WriteScaffoldGraph(ScaffoldGraph * scaffoldGraph, bool * contigOrientation, long int contigCount){
+    
+    long int i = 0;
+    long int j = 0;
+    
+    char * outPutFileName = new char[20];
+    strcpy(outPutFileName, "scaffoldGraph.fa");
+    ofstream ocout;
+    ocout.open(outPutFileName);
+    
+    ScaffoldEdge * tempEdge = NULL;
+    
+    for(i = 0; i<contigCount; i++){
+        if(contigOrientation[i]==0){
+            tempEdge = scaffoldGraph[i].outLink;
+        }else{
+            tempEdge = scaffoldGraph[i].inLink;
+        }
+        while(tempEdge!=NULL){
+            ocout<<i<<" "<<tempEdge->contigIndex<<" "<<tempEdge->fitNumber<<endl;
+            tempEdge = tempEdge->next;
+        }
+    }
+    
+}
+
+ScaffoldSet * OptimizeScaffoldSet(ContigSet * contigSet, ScaffoldSet * scaffoldSet, ScaffoldGraph * scaffoldGraph, long int & contigCount, long int realContigCount, long int * contigLength, long int insertsize, long int std, long int lambda){
     
     long int i = 0;
     long int j = 0;
@@ -2530,18 +2881,28 @@ ScaffoldSet * OptimizeScaffoldSet(ScaffoldSet * scaffoldSet, ScaffoldGraph * sca
     
     long int conflictOrientation = 1;
     i = 0;
-    while(conflictOrientation!=0 && i<3){
-        conflictOrientation = DetermineOrientationOfContigs(scaffoldGraph, contigCount, contigOrientation, 0, -1);
+    
+    double minScore = 0.9;
+     
+    while(minScore > 0.0001){
+        conflictOrientation = DetermineOrientationOfContigs(scaffoldGraph, contigCount, contigOrientation, visitedIndex, minScore);
         if(conflictOrientation == -1){
             break;
         }
-        i++;
+        minScore = minScore - 0.1;
     }
- 
-    double minScore = 0.9;
+    
+    for(i=0;i<contigCount;i++){
+        visitedIndex[i] = new bool[contigCount];
+        for(j=0;j<contigCount;j++){
+            visitedIndex[i][j] = false;
+        }   
+    }
+    
+    minScore = 0.9;
     long int * noResult = NULL;
     while(minScore > 0.0001 && conflictOrientation != -1){
-        noResult = IterativeDetermineOrderOfContigs(scaffoldGraph,contigCount,contigOrientation, contigOrder, contigPosition, visitedIndex, insertsize, std, lambda,minScore);
+        noResult = IterativeDetermineOrderOfContigs(contigSet, scaffoldGraph,contigCount,contigOrientation, contigOrder, contigPosition, visitedIndex, insertsize, std, lambda,minScore);
         if(noResult == NULL){
             break;
         }
@@ -2557,7 +2918,7 @@ ScaffoldSet * OptimizeScaffoldSet(ScaffoldSet * scaffoldSet, ScaffoldGraph * sca
         while(tempEdge!=NULL){
             pre = tempEdge->next;
             
-            if(visitedIndex[i][tempEdge->contigIndex] == false && tempEdge->fitNumber >=minScore+0.1){
+            if(visitedIndex[i][tempEdge->contigIndex] == false && tempEdge->fitNumber >=0.1){
                 
                 tempContigIndex = tempEdge->contigIndex;
                 DeleteSpecialScaffoldEdge(scaffoldGraph, i, tempContigIndex);
@@ -2572,7 +2933,7 @@ ScaffoldSet * OptimizeScaffoldSet(ScaffoldSet * scaffoldSet, ScaffoldGraph * sca
         tempEdge = scaffoldGraph[i].inLink;
         while(tempEdge!=NULL){
             pre = tempEdge->next;
-            if(visitedIndex[i][tempEdge->contigIndex] == false && tempEdge->fitNumber >=minScore+0.1){
+            if(visitedIndex[i][tempEdge->contigIndex] == false && tempEdge->fitNumber >=0.1){
                 
                 tempContigIndex = tempEdge->contigIndex;
                 DeleteSpecialScaffoldEdge(scaffoldGraph, i, tempContigIndex);
@@ -2584,6 +2945,22 @@ ScaffoldSet * OptimizeScaffoldSet(ScaffoldSet * scaffoldSet, ScaffoldGraph * sca
             tempEdge = tempEdge->next;
         }
     }
+ 
+    SubGraph * subGraph = DFSTranverseScaffoldGraph(scaffoldGraph,contigCount,contigOrientation);
+    SubGraph * reachableNode = ReachableNode(scaffoldGraph, contigOrientation,contigCount,0);
+    RemovePositionOverlap(scaffoldGraph,subGraph,reachableNode,contigCount,contigPosition);
+    
+    subGraph = DFSTranverseScaffoldGraph(scaffoldGraph,contigCount,contigOrientation);
+    reachableNode = ReachableNode(scaffoldGraph, contigOrientation,contigCount,0);
+    RemovePositionOverlap(scaffoldGraph,subGraph,reachableNode,contigCount,contigPosition);
+    
+    subGraph = DFSTranverseScaffoldGraph(scaffoldGraph,contigCount,contigOrientation);
+    reachableNode = ReachableNode(scaffoldGraph, contigOrientation,contigCount,1);
+    RemovePositionOverlap(scaffoldGraph,subGraph,reachableNode,contigCount,contigPosition);
+    
+    subGraph = DFSTranverseScaffoldGraph(scaffoldGraph,contigCount,contigOrientation);
+    reachableNode = ReachableNode(scaffoldGraph, contigOrientation,contigCount,1);
+    RemovePositionOverlap(scaffoldGraph,subGraph,reachableNode,contigCount,contigPosition);
     
     bool * index = new bool[contigCount];
     long int tempContigCount = contigCount;

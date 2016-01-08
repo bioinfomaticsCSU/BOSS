@@ -18,14 +18,14 @@ int main(int argc, char *argv[]){
     time_t timep;
     time(&timep);
     ofstream ocout;
-    ocout.open("LNSG_time_memory.txt");
+    ocout.open("BOSS_time_memory.txt");
     
     for(int i = 0; i<argc; i++){
         ocout<<argv[i]<<" ";
     }
     ocout<<endl;
     
-    ocout<<"LNSG start time:"<<asctime(gmtime(&timep))<<endl;
+    ocout<<"BOSS start time:"<<asctime(gmtime(&timep))<<endl;
       
     if((argc-3)%8!=0){
         cout<<"Please Input Correct Arguments!"<<endl;
@@ -69,14 +69,14 @@ int main(int argc, char *argv[]){
         
         OptimizeScaffoldGraph((scaffoldGraphHead+i)->scaffoldGraph, scaffoldCount, inputArg[i].readLength, inputArg[i].insertsize, inputArg[i].std, inputArg[i].insertsize+lambda*inputArg[i].std, 0.4);
         
-        scaffoldSet = OptimizeScaffoldSet(scaffoldSet, (scaffoldGraphHead+i)->scaffoldGraph, scaffoldCount, contigCount, contigLength, inputArg[i].insertsize, inputArg[i].std, lambda);
+        scaffoldSet = OptimizeScaffoldSet(contigSet, scaffoldSet, (scaffoldGraphHead+i)->scaffoldGraph, scaffoldCount, contigCount, contigLength, inputArg[i].insertsize, inputArg[i].std, lambda);
     }
     OutPutScaffoldSet(scaffoldSet, contigSet, contigCount, argv[argc-1]);
     
     time(&timep);
-    ocout<<"LNSG end time:"<<asctime(gmtime(&timep))<<endl; 
+    ocout<<"BOSS end time:"<<asctime(gmtime(&timep))<<endl; 
     
-    
+    /*
     char * file = new char[100];
     long int pid = getpid();
     sprintf(file,"/proc/%ld/status",pid);
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]){
     while(icin.getline(line,1000)){
         ocout<<line<<endl;
     }
-    
+    */
 
 }
 

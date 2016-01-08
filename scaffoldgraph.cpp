@@ -1487,6 +1487,9 @@ int OptimizeScaffoldGraph(ScaffoldGraph * scaffoldGraph, long int contigCount, l
             
             if(temp->fitDistribution == 1 && temp->fitNumber > 0.1){
                 numIndex = true;
+                if(temp->fitNumber < scoreThreshold){
+                    temp->fitNumber = scoreThreshold; 
+                }
             }
             
             if((temp->fitNumber < scoreThreshold && numIndex == false) || temp->edgeWeight < minMappedPairedReadNumber){
