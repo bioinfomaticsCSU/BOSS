@@ -35,13 +35,13 @@ BOSS is written C++ and therefore will require a machine with GNU C++ pre-instal
 
 Create a main directory (eg:BOSS). Copy all source code to this directory.
 
-Type "g++ main.cpp scaffoldgraph.cpp scaffolding.cpp -o scaffold ./lp/liblpsolve55.a -lm -ldl -I include/ -L lib/ -lbamtools" 
+Type "g++ main.cpp scaffoldgraph.cpp scaffolding.cpp -o boss ./lp/liblpsolve55.a -lm -ldl -I include/ -L lib/ -lbamtools" 
 
 2)Running.
 
 Run command line: 
 
-"scaffold contigs.fa bamfile read_length insert_size std min_weight min_number min_cov is_paired_end out_put_path"
+"boss contigs.fa bamfile read_length insert_size std min_weight min_number min_cov is_paired_end out_put_path"
 
 contigs.fa is the file includes contigs produced by one assembler.
 
@@ -65,4 +65,4 @@ out_put_path is the path which is used for output.
 
 3)Output.
 
-ScaffoldSet.fa is the file which includes scaffolds produced by LNSG.
+ScaffoldSet.fa is the file which includes scaffolds produced by BOSS.
