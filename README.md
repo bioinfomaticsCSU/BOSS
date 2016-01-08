@@ -63,6 +63,9 @@ is_paired_end is 0 or 1, 1 represents that read library is paired-end library, 0
 
 scaffold_file_name is the output file name, this file includes scaffolds produced by BOSS. 
 
+If there two read libraries, the command line:
+"boss contigs.fa bamfile1 read_length1 insert_size1 std1 min_weight1 min_number1 min_cov1 is_paired_end1 bamfile2 read_length2 insert_size2 std2 min_weight2 min_number2 min_cov2 is_paired_end2 scaffold_file_name"
+
 3)Output.
 
 scaffold_file_name is the file (fasta format) which includes scaffolds produced by BOSS.
