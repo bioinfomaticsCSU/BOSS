@@ -41,7 +41,7 @@ Type "g++ main.cpp scaffoldgraph.cpp scaffolding.cpp -o boss ./lp/liblpsolve55.a
 
 Run command line: 
 
-"boss contigs.fa bamfile read_length insert_size std min_weight min_number min_cov is_paired_end out_put_path"
+"boss contigs.fa bamfile read_length insert_size std min_weight min_number min_cov is_paired_end scaffold_file_name"
 
 contigs.fa is the file includes contigs produced by one assembler.
 
@@ -61,8 +61,8 @@ min_cov is the coverage cutoff, when sequence region's coverage is greater than 
 
 is_paired_end is 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired.
 
-out_put_path is the path which is used for output. 
+scaffold_file_name is the output file name, this file includes scaffolds produced by BOSS. 
 
 3)Output.
 
-ScaffoldSet.fa is the file which includes scaffolds produced by BOSS.
+scaffold_file_name is the file (fasta format) which includes scaffolds produced by BOSS.
