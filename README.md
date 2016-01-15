@@ -57,7 +57,7 @@ min_weight is one cutoff for removing suprious edgs in scaffold graph (default: 
 
 min_number is the minimum number of links between contigs (default:3).
 
-min_cov is the coverage cutoff, when sequence region's coverage is greater than min_cov, it will be regarded as repetitive region(default: 3). 
+min_cov is the coverage cutoff, when sequence region's coverage is greater than min_cov, it will be regarded as repetitive region(default: 4). 
 
 is_paired_end is 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired.
 
