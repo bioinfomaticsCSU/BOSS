@@ -1,5 +1,8 @@
-# BOSS
-A new algorithm for scaffolding
+# BOSS(Building Optimized Scaffold graph for Scaffolding)
+
+A novel algorithm is used for scaffolding contigs produced by any assembler. 
+
+BOSS is more advantageous for scaffolding read library whose ratio of read number to genome size is large.
 
 License
 =========
@@ -26,10 +29,8 @@ ChangSha
 CHINA, 410083
 
 
-Scaffolder: BOSS(Building Optimized Scaffold graph for Scaffolding)
+Scaffolder: BOSS
 =================
-
-BOSS is more advantageous for scaffolding read library whose ratio of read number to genome size is large.
 
 1)Installing.
 
