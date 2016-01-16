@@ -41,7 +41,7 @@ Type "g++ main.cpp scaffoldgraph.cpp scaffolding.cpp -o boss ./lp/liblpsolve55.a
 
 Run command line: 
 
-"boss contigs.fa bamfile read_length insert_size std min_weight min_number min_cov is_paired_end scaffold_file_name"
+"boss contigs.fa bamfile read_length insert_size std min_weight min_number min_cov_time is_paired_end scaffold_file_name"
 
 contigs.fa is the file includes contigs produced by one assembler.
 
@@ -51,13 +51,13 @@ read_length is the length of read.
 
 insert_size is the insert size of read library.
 
-std is standard deviation of insert size (default: 0.1*insert_size).
+std is standard deviation of insert size (such as, std = 0.1*insert_size).
 
-min_weight is one cutoff for removing suprious edgs in scaffold graph (default: 0.3).
+min_weight is one cutoff for removing suprious edgs in scaffold graph (such as, min_weight = 0.3).
 
-min_number is the minimum number of links between contigs (default:3).
+min_number is the minimum number of links between contigs (such as, min_number = 3).
 
-min_cov is the coverage cutoff, when sequence region's coverage is greater than min_cov, it will be regarded as repetitive region(default: 4). 
+min_cov_time is the coverage time cutoff, when sequence region's coverage is greater than min_cov_time times larger than average coverage, it will be regarded as repetitive region(such as, min_cov_time = 4). 
 
 is_paired_end is 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired.
 
