@@ -26,8 +26,10 @@ ChangSha
 CHINA, 410083
 
 
-Scaffolder
+Scaffolder: BOSS(Building Optimized Scaffold graph for Scaffolding)
 =================
+
+BOSS is more advantageous for scaffolding read library whose ratio of read number to genome size is large.
 
 1)Installing.
 
