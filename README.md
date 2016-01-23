@@ -2,8 +2,6 @@
 
 A novel algorithm is used for scaffolding contigs produced by any assembler. 
 
-BOSS is more advantageous for scaffolding read library whose ratio of read number to genome size is large.
-
 License
 =========
 
