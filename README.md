@@ -58,8 +58,6 @@ min_weight is one cutoff for removing suprious edgs in scaffold graph (such as, 
 
 min_number is the minimum number of links between contigs (such as, min_number = 3).
 
-min_cov_time is the coverage time cutoff, when sequence region's coverage is greater than min_cov_time times larger than average coverage, it will be regarded as repetitive region(such as, min_cov_time = 4). 
-
 is_paired_end is 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired.
 
 scaffold_file_name is the output file name, this file includes scaffolds produced by BOSS. 
