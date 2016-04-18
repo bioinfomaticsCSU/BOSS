@@ -12,6 +12,7 @@
 #include <exception>
 
 #include "scaffoldgraph.h"
+#include "scaffolding.h"
 #include "lp/lp_lib.h"
 
 
@@ -546,13 +547,18 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
         p1 = p1/(double)edgeCount;
         p = edgeCount/p;
     }else{
-        p1 = p1/(double)edgeCount;
-        p = p/edgeCount;
+        //p1 = p1/(double)edgeCount;
+        //if(p == 0 && edgeCount == 0){
+            //p = 0;
+        //}else{
+            p = p/edgeCount;
+        //}
     }
     
     fitD = 1;
     
     fitN = p;
+    
     
 
     delete [] realCount;
@@ -708,8 +714,12 @@ double MapFitDistribution1(long int * index, long int * noMapIndex, MapPosition 
         p1 = p1/(double)edgeCount;
         p = edgeCount/p;
     }else{
-        p1 = p1/(double)edgeCount;
-        p = p/edgeCount;
+        //p1 = p1/(double)edgeCount;
+        //if(p == 0 && edgeCount == 0){
+            //p = 0;
+        //}else{
+            p = p/edgeCount;
+        //}
     }
     
     fitD = 1; 
@@ -1488,11 +1498,11 @@ int OptimizeScaffoldGraph(ScaffoldGraph * scaffoldGraph, long int contigCount, l
             if(temp->fitDistribution == 1 && temp->fitNumber > 0.1){
                 numIndex = true;
                 if(temp->fitNumber < scoreThreshold){
-                    temp->fitNumber = scoreThreshold; 
+                    temp->fitNumber = scoreThreshold + 0.00001; 
                 }
             }
             
-            if((temp->fitNumber < scoreThreshold && numIndex == false) || temp->edgeWeight < minMappedPairedReadNumber){
+            if((temp->fitNumber < scoreThreshold && numIndex == false) || temp->edgeWeight < minMappedPairedReadNumber || temp->fitNumber < 0){
                 
                 long int index = temp->contigIndex;
                 
@@ -1749,7 +1759,8 @@ long int DeleteScaffoldGraphEdge(ScaffoldGraph * scaffoldGraph, long int index, 
 
 int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldLength, ContigSet * contigSet, long int * contigLength, ScaffoldToContig * scaffoldToContig, long int scaffoldCount, ScaffoldGraphHead * scaffoldGraphHead, InputArg * inputArg, char * result){
     
-    const std::string bamFileName = inputArg->bamFileName;
+    const std::string bamFileName1 = inputArg->bamFileName1;
+    const std::string bamFileName2 = inputArg->bamFileName2;
     long int insertsize = inputArg->insertsize;
     double std = inputArg->std; 
     long int contigLengthCutOff = insertsize + lambda*std;
@@ -1784,8 +1795,8 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
     BamReader bamReader;
     BamReader bamReaderLeft;
     BamReader bamReaderRight;
-    string bamFileNameRight = bamFileName + "_1";
-    string bamFileNameLeft = bamFileName + "_2";
+    string bamFileNameRight = bamFileName1;
+    string bamFileNameLeft = bamFileName2; 
     
     bamReader.Open(bamFileNameLeft);
     bamReaderLeft.Open(bamFileNameLeft);
@@ -1977,13 +1988,26 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
         pp = pp + scaffoldGraph[i].leftReadCoverage + scaffoldGraph[i].rightReadCoverage;
     }
     allAverageReadCoverage = (double)(aa+bb-2*falsePaired)*readLength/(double)allContigLength;
+    double stdOfReadCoverage = 0;
+    //cout<<"tt"<<endl;
+    for(i=0;i<allReadNumber;i++){
+        if(allPairedReadMappedData[i].leftPosition>=0){
+            stdOfReadCoverage = stdOfReadCoverage + pow((double)(readMapPosition[allPairedReadMappedData[i].leftReference].leftReadCoverage[allPairedReadMappedData[i].leftPosition] + readMapPosition[allPairedReadMappedData[i].leftReference].rightReadCoverage[allPairedReadMappedData[i].leftPosition])-allAverageReadCoverage,2);
+        }
+        if(allPairedReadMappedData[i].rightPosition>=0){
+            stdOfReadCoverage = stdOfReadCoverage + pow((double)(readMapPosition[allPairedReadMappedData[i].rightReference].rightReadCoverage[allPairedReadMappedData[i].rightPosition] + readMapPosition[allPairedReadMappedData[i].rightReference].rightReadCoverage[allPairedReadMappedData[i].rightPosition])-allAverageReadCoverage,2);
+        }
+    }
     
+    stdOfReadCoverage = sqrt(stdOfReadCoverage/allReadNumber);
+    //cout<<"stdOfReadCoverage:"<<stdOfReadCoverage<<"--allAverageReadCoverage:"<<allAverageReadCoverage<<endl;
     
     long int repeatRemoveNumber = 0;
-    for(i=0;i<allReadNumber && allAverageReadCoverage > 5;i++){
+    for(i=0;i<allReadNumber;i++){
         if(allPairedReadMappedData[i].leftPosition>=0){
-            double tempCov = (double)(readMapPosition[allPairedReadMappedData[i].leftReference].leftReadCoverage[allPairedReadMappedData[i].leftPosition] + readMapPosition[allPairedReadMappedData[i].leftReference].rightReadCoverage[allPairedReadMappedData[i].leftPosition])/allAverageReadCoverage;
-            if(tempCov > repeativeCutOff){
+            double tempStd = ((double)(readMapPosition[allPairedReadMappedData[i].leftReference].leftReadCoverage[allPairedReadMappedData[i].leftPosition] + readMapPosition[allPairedReadMappedData[i].leftReference].rightReadCoverage[allPairedReadMappedData[i].leftPosition]) - allAverageReadCoverage)/stdOfReadCoverage;
+            tempStd = fabs(tempStd);
+            if(tempStd > 2){
                 allPairedReadMappedData[i].leftPosition = -1;
                 allPairedReadMappedData[i].rightPosition = -1;
                 repeatRemoveNumber++;
@@ -1991,8 +2015,9 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
             }
         }
         if(allPairedReadMappedData[i].rightPosition>=0){
-            double tempCov = (double)(readMapPosition[allPairedReadMappedData[i].rightReference].rightReadCoverage[allPairedReadMappedData[i].rightPosition] + readMapPosition[allPairedReadMappedData[i].rightReference].rightReadCoverage[allPairedReadMappedData[i].rightPosition])/allAverageReadCoverage;
-            if(tempCov > repeativeCutOff){
+            double tempStd = ((double)(readMapPosition[allPairedReadMappedData[i].rightReference].rightReadCoverage[allPairedReadMappedData[i].rightPosition] + readMapPosition[allPairedReadMappedData[i].rightReference].rightReadCoverage[allPairedReadMappedData[i].rightPosition]) - allAverageReadCoverage)/stdOfReadCoverage;
+            tempStd = fabs(tempStd);
+            if(tempStd > 2){
                 allPairedReadMappedData[i].leftPosition = -1;
                 allPairedReadMappedData[i].rightPosition = -1;
                 repeatRemoveNumber++;
@@ -2000,8 +2025,7 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
             }
         }
     }  
-    
-    
+
     i = 0;
     
     while(i<allReadNumber){
@@ -2155,7 +2179,8 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
 
     noMappedReadRate = 1-(double)(aa+bb-2*falsePaired)/(double)(2*allReadNumber);
     
-    
+    //cout<<1-noMappedReadRate<<"--"<<(double)(aa+bb)/(double)(2*allReadNumber)<<endl;
+    //exit(0);
     
     for(i=0;i<scaffoldCount;i++){
         
@@ -2273,7 +2298,7 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
                     
                 }              
                 
-                //DeleteMapPositionOfEdge(temp);
+                
                 temp = temp->next;
 
                 

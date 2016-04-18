@@ -141,6 +141,10 @@ ScaffoldSet * GetScaffoldSet(ScaffoldGraph * scaffoldGraph, long int contigCount
 void OutPutScaffoldTag(ScaffoldSet * scaffoldSet);
 void OutPutScaffoldTag(ScaffoldSet * scaffoldSet, char * result);
 void OutPutScaffoldSet(ScaffoldSet * scaffoldSet, ContigSet * contigSet, long int contigCount, char * result); 
+void OutPutScaffoldSet(ScaffoldGraph * scaffoldGraph, ContigSet * contigSet, double cutoff, long int contigCount, char * suffix);
+void OutPutScaffoldSetAllNumber(ScaffoldGraph * scaffoldGraph, ContigSet * contigSet, int cutoff, long int contigCount);
+void OutPutScaffoldSetAll(ScaffoldGraph * scaffoldGraph, ContigSet * contigSet, double min, long int contigCount, char * outputFile);
+long int GetScaffoldGraphEdgeNumber(ScaffoldGraph * scaffoldGraph, long int contigCount);
 
 ScaffoldSet * OptimizeScaffoldSet(ContigSet * contigSet, ScaffoldSet * scaffoldSet, ScaffoldGraph * scaffoldGraph, long int & contigCount, long int realContigCount, long int * contigLength, long int insertsize, long int std, long int lambda);
 
@@ -152,7 +156,9 @@ int BFSScaffolding(ScaffoldGraph * scaffoldGraph, ScaffoldSet * scaffoldSet, lon
 
 int AddShortContigToScaffoldSet(ScaffoldSet * scaffoldSet, long int contigCount, bool * index);
 
-long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, bool ** fixIndex, double minScore);
+long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, bool ** fixIndex, double minScore, bool last);
 long int * IterativeDetermineOrderOfContigs(ContigSet * contigSet, ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, long int * tempContigOrder, long int * contigPosition, bool ** fixIndex, long int insertsize, long int std, long int lambda, double minScore);
+
+double * weightOrder(ScaffoldGraph * scaffoldGraph, long int contigCount);
 
 #endif

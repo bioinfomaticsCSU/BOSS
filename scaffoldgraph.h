@@ -23,7 +23,8 @@ extern double scoreThreshold;
 extern int minMappedPairedReadNumber;
 
 typedef struct InputArg{
-    char * bamFileName;
+    char * bamFileName1;
+    char * bamFileName2;
     long int readLength;
     long int insertsize;
     long int std;
@@ -32,7 +33,8 @@ typedef struct InputArg{
     double minRepetitiveCov;
     bool pairedRead;
     InputArg(){
-        bamFileName = NULL;
+        bamFileName1 = NULL;
+        bamFileName2 = NULL;
         readLength = 0;
         insertsize = 0;
         std = 0;

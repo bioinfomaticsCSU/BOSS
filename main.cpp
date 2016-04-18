@@ -35,13 +35,13 @@ int main(int argc, char *argv[]){
 
     InputArg * inputArg = new InputArg[libraryCount];
     for(int i = 0; i < libraryCount; i++){
-        inputArg[i].bamFileName = argv[2+8*i];
-        inputArg[i].readLength = atoi(argv[2+8*i+1]);
-        inputArg[i].insertsize = atoi(argv[2+8*i+2]);
-        inputArg[i].std = atoi(argv[2+8*i+3]);
-        inputArg[i].minEdgeWeight = atof(argv[2+8*i+4]);
-        inputArg[i].minEdgeLinkNumber = atoi(argv[2+8*i+5]);
-        inputArg[i].minRepetitiveCov = atof(argv[2+8*i+6]);
+        inputArg[i].bamFileName1 = argv[2+8*i];
+        inputArg[i].bamFileName2 = argv[2+8*i+1];
+        inputArg[i].readLength = atoi(argv[2+8*i+2]);
+        inputArg[i].insertsize = atoi(argv[2+8*i+3]);
+        inputArg[i].std = atoi(argv[2+8*i+4]);
+        inputArg[i].minEdgeWeight = atof(argv[2+8*i+5]);
+        inputArg[i].minEdgeLinkNumber = atoi(argv[2+8*i+6]);
         inputArg[i].pairedRead = atoi(argv[2+8*i+7]);
     }
     
@@ -59,8 +59,10 @@ int main(int argc, char *argv[]){
     long int scaffoldCount = contigCount;
     ScaffoldGraphHead * scaffoldGraphHead = new ScaffoldGraphHead[libraryCount];
     
+    long int ss = 0;
+    
     for(int i = 0; i < libraryCount; i++){
-        
+       
         scaffoldToContig = GetScaffoldToContig(scaffoldSet, contigLength, contigCount, scaffoldCount); 
         
         scaffoldLength = GetScaffoldSetLength(scaffoldSet, scaffoldCount);
@@ -70,23 +72,13 @@ int main(int argc, char *argv[]){
         OptimizeScaffoldGraph((scaffoldGraphHead+i)->scaffoldGraph, scaffoldCount, inputArg[i].readLength, inputArg[i].insertsize, inputArg[i].std, inputArg[i].insertsize+lambda*inputArg[i].std, 0.4);
         
         scaffoldSet = OptimizeScaffoldSet(contigSet, scaffoldSet, (scaffoldGraphHead+i)->scaffoldGraph, scaffoldCount, contigCount, contigLength, inputArg[i].insertsize, inputArg[i].std, lambda);
+        
     }
+    
     OutPutScaffoldSet(scaffoldSet, contigSet, contigCount, argv[argc-1]);
     
     time(&timep);
     ocout<<"BOSS end time:"<<asctime(gmtime(&timep))<<endl; 
     
-    /*
-    char * file = new char[100];
-    long int pid = getpid();
-    sprintf(file,"/proc/%ld/status",pid);
-    ifstream icin;
-    icin.open(file);
-    char * line = new char[1000];
-    while(icin.getline(line,1000)){
-        ocout<<line<<endl;
-    }
-    */
-
 }
 

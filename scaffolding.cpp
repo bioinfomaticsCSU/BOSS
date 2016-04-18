@@ -1567,7 +1567,7 @@ long int DetermineOrientationOfContigsHeuristic(ScaffoldGraph * scaffoldGraph, l
 
 
 
-long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, bool ** fixIndex, double minScore){
+long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int contigCount, bool * contigOrientation, bool ** fixIndex, double minScore, bool last){
     
     long int i = 0;
     long int j = 0;
@@ -1778,6 +1778,10 @@ long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int c
     set_maxim(lp);
     set_scaling(lp, 128);  
     ret = solve(lp);
+
+    if(!(ret==0 || ret ==1)){
+
+    }
     
     REAL * pv = new REAL[constraintNumber + contigCount + edgeNumber + 1];
     get_primal_solution(lp,pv);
@@ -1797,7 +1801,7 @@ long int DetermineOrientationOfContigs(ScaffoldGraph * scaffoldGraph, long int c
         }
     }
     
-    for(i=constraintNumber+1;i<contigCount+constraintNumber+1 && minScore<0.11;i++){
+    for(i=constraintNumber+1;i<contigCount+constraintNumber+1 && minScore < 0.11;i++){
         contigOrientation[i-constraintNumber-1] = pv[i];
     }
     
@@ -2071,16 +2075,18 @@ long int * IterativeDetermineOrderOfContigs(ContigSet * contigSet, ScaffoldGraph
     set_maxim(lp);
     
     set_bb_depthlimit(lp, 10);
-    
+
     ret = solve(lp);
-    
+
     if(!(ret==0 || ret ==1)){
+
         set_break_at_first(lp, true);
         ret = solve(lp);
         if(!(ret==0 || ret ==1)){
             return NULL;
         }
     }
+    
     REAL * pv = new REAL[constraintNumber + contigCount + edgeNumber + 1];
     get_primal_solution(lp,pv);
     
@@ -2091,7 +2097,7 @@ long int * IterativeDetermineOrderOfContigs(ContigSet * contigSet, ScaffoldGraph
     
     long int trueNumber = 0;
     long int realTrueNumber = 0;
-
+    
     for(i=contigCount+constraintNumber+1;i<contigCount+constraintNumber+p+1;i++){
         if(pv[i] < 1){
             long int d = pv[1+constraintNumber+edgeRightNode[i-contigCount-constraintNumber-1]] - pv[1+constraintNumber+edgeLeftNode[i-contigCount-constraintNumber-1]] - scaffoldGraph[edgeLeftNode[i-contigCount-constraintNumber-1]].length;
@@ -2108,6 +2114,8 @@ long int * IterativeDetermineOrderOfContigs(ContigSet * contigSet, ScaffoldGraph
     for(i=0;i<contigCount;i++){
         delete [] index[i];
     }
+    
+    
     delete [] contigVisited;
     delete [] index;
     delete [] weight;
@@ -2115,6 +2123,7 @@ long int * IterativeDetermineOrderOfContigs(ContigSet * contigSet, ScaffoldGraph
     delete [] edgeRightNode;
     delete [] gapDistance;
     delete [] pv;
+    
     delete_lp(lp);
     
 }
@@ -2794,6 +2803,278 @@ void OutPutScaffoldSet(ScaffoldSet * scaffoldSet, ContigSet * contigSet, long in
 
 }
 
+long int GetScaffoldGraphEdgeNumber(ScaffoldGraph * scaffoldGraph, long int contigCount){
+    
+    long int i = 0;
+    long int edgeNumber = 0;
+    
+    char * outputFile = new char[20];
+    strcpy(outputFile, "edgeNumberCount.fa");
+    ofstream ocout;
+    ocout.open(outputFile);
+    
+    ScaffoldEdge * tempEdge = NULL;
+    for(i =0; i<contigCount; i++){
+        
+        tempEdge = scaffoldGraph[i].outLink;
+        
+        while(tempEdge!=NULL){
+            ocout<<i<<"--"<<tempEdge->contigIndex<<"--"<<tempEdge->fitNumber<<endl;
+            edgeNumber++;
+            tempEdge = tempEdge->next;
+        }
+        
+        tempEdge = scaffoldGraph[i].inLink;
+        
+        while(tempEdge!=NULL){
+            ocout<<i<<"--"<<tempEdge->contigIndex<<"--"<<tempEdge->fitNumber<<endl;
+            edgeNumber++;
+            tempEdge = tempEdge->next;
+        }
+    
+    }
+    ocout<<"-------------------------------------"<<endl;
+    ocout<<"allEdgeNumber:"<<edgeNumber<<"--"<<edgeNumber/2<<endl;
+    
+    double cutoff = 1;
+    
+    while(cutoff>=0){
+        edgeNumber = 0;
+        for(i =0; i<contigCount; i++){
+        
+            tempEdge = scaffoldGraph[i].outLink;
+        
+            while(tempEdge!=NULL){
+                if(tempEdge->fitNumber>=cutoff && tempEdge->fitNumber<cutoff+0.1){
+                    ocout<<cutoff<<"--"<<i<<"--"<<tempEdge->contigIndex<<"--"<<tempEdge->fitNumber<<endl;
+                    edgeNumber++;
+                }
+                tempEdge = tempEdge->next;
+            }
+            
+            tempEdge = scaffoldGraph[i].inLink;
+        
+            while(tempEdge!=NULL){
+                if(tempEdge->fitNumber>=cutoff && tempEdge->fitNumber<cutoff+0.1){
+                    ocout<<cutoff<<"--"<<i<<"--"<<tempEdge->contigIndex<<"--"<<tempEdge->fitNumber<<endl;
+                    edgeNumber++;
+                }
+                tempEdge = tempEdge->next;
+            }
+            
+        }
+        ocout<<cutoff<<"--EdgeNumber:"<<edgeNumber<<"--"<<edgeNumber/2<<endl;
+        cutoff = cutoff - 0.1;
+    }    
+    
+    
+    
+    
+}
+
+
+void OutPutScaffoldSet(ScaffoldGraph * scaffoldGraph, ContigSet * contigSet, double cutoff, long int contigCount, char * suffix){
+    long int i = 0;
+    long int j = 0;
+    
+    bool ** index = new bool*[contigCount];
+    for(i=0;i<contigCount;i++){
+        index[i] = new bool[contigCount];
+        for(j=0;j<contigCount;j++){
+            index[i][j] = false;
+        }   
+    }
+    
+    long int edgeNumber = 0;
+    
+    char * outputFile = new char[30];
+    strcpy(outputFile, "contigWeight_");
+    strcat(outputFile, suffix);
+    char cutoffFile[6];
+    sprintf(cutoffFile, "%04.2f", cutoff);
+    strcat(outputFile, cutoffFile);
+    char cutoffFile1[6];
+    strcpy(cutoffFile1, ".fa");
+    strcat(outputFile, cutoffFile1);
+    
+    ofstream ocout;
+    ocout.open(outputFile);
+  
+    ScaffoldEdge * tempEdge = NULL;
+    for(i =0; i<contigCount; i++){
+        
+        long int a = 0;
+        while(a<=1){
+            if(a==0){
+                tempEdge = scaffoldGraph[i].outLink;
+            }else{
+                tempEdge = scaffoldGraph[i].inLink;
+            }
+            
+            while(tempEdge != NULL){
+                if(tempEdge->fitNumber >= cutoff - 0.000001 && tempEdge->fitNumber < cutoff + 0.1){
+                    if(tempEdge->mapPosition->orientation != tempEdge->mapPosition->mateOrientation && index[i][tempEdge->contigIndex] == false){
+                        ocout<<">"<<edgeNumber<<endl;
+                        ocout<<contigSet[i].contig;
+                        for(j =0;j<tempEdge->gapDistance;j++){
+                            ocout<<"N";
+                        }
+                        ocout<<contigSet[tempEdge->contigIndex].contig<<endl;
+                        edgeNumber++;
+                        index[i][tempEdge->contigIndex] = true;
+                        index[tempEdge->contigIndex][i] = true;
+                    }
+                    if(tempEdge->mapPosition->orientation == tempEdge->mapPosition->mateOrientation && index[i][tempEdge->contigIndex] == false){
+                        ocout<<">"<<edgeNumber<<endl;
+                        ocout<<contigSet[i].contig;
+                        for(j =0;j<tempEdge->gapDistance;j++){
+                              ocout<<"N";
+                        }
+                        char * tempChar1 = new char[strlen(contigSet[tempEdge->contigIndex].contig)+1];
+                        ReverseComplement(contigSet[tempEdge->contigIndex].contig, tempChar1);
+                        ocout<<tempChar1<<endl;
+                        edgeNumber++;
+                        index[i][tempEdge->contigIndex] = true;
+                        index[tempEdge->contigIndex][i] = true;
+                    }
+                }
+                tempEdge = tempEdge->next;
+            }   
+            a++;
+        }
+        
+    }
+    
+} 
+
+void OutPutScaffoldSetAll(ScaffoldGraph * scaffoldGraph, ContigSet * contigSet, double min, long int contigCount, char * outputFile){
+    long int i = 0;
+    long int j = 0;
+    
+    bool ** index = new bool*[contigCount];
+    for(i=0;i<contigCount;i++){
+        index[i] = new bool[contigCount];
+        for(j=0;j<contigCount;j++){
+            index[i][j] = false;
+        }   
+    }
+    
+    long int edgeNumber = 0;
+    
+    ofstream ocout;
+    ocout.open(outputFile);
+  
+    ScaffoldEdge * tempEdge = NULL;
+    for(i =0; i<contigCount; i++){
+        long int a = 0;
+        while(a<=1){
+            if(a==0){
+                tempEdge = scaffoldGraph[i].outLink;
+            }else{
+                tempEdge = scaffoldGraph[i].inLink;
+            }
+            
+            while(tempEdge != NULL){
+                if(tempEdge->fitNumber >= min - 0.000001){
+                    if(tempEdge->mapPosition->orientation != tempEdge->mapPosition->mateOrientation && index[i][tempEdge->contigIndex] == false){
+                        ocout<<">"<<edgeNumber<<endl;
+                        ocout<<contigSet[i].contig;
+                        for(j =0;j<tempEdge->gapDistance;j++){
+                            ocout<<"N";
+                        }
+                        ocout<<contigSet[tempEdge->contigIndex].contig<<endl;
+                        edgeNumber++;
+                        index[i][tempEdge->contigIndex] = true;
+                        index[tempEdge->contigIndex][i] = true;
+                    }
+                    if(tempEdge->mapPosition->orientation == tempEdge->mapPosition->mateOrientation && index[i][tempEdge->contigIndex] == false){
+                        ocout<<">"<<edgeNumber<<endl;
+                        ocout<<contigSet[i].contig;
+                        for(j =0;j<tempEdge->gapDistance;j++){
+                              ocout<<"N";
+                        }
+                        char * tempChar1 = new char[strlen(contigSet[tempEdge->contigIndex].contig)+1];
+                        ReverseComplement(contigSet[tempEdge->contigIndex].contig, tempChar1);
+                        ocout<<tempChar1<<endl;
+                        edgeNumber++;
+                        index[i][tempEdge->contigIndex] = true;
+                        index[tempEdge->contigIndex][i] = true;
+                    }
+                }
+                tempEdge = tempEdge->next;
+            }   
+            a++;
+        }
+    }
+    
+} 
+
+void OutPutScaffoldSetAllNumber(ScaffoldGraph * scaffoldGraph, ContigSet * contigSet, int cutoff, long int contigCount){
+    long int i = 0;
+    long int j = 0;
+    
+    bool ** index = new bool*[contigCount];
+    for(i=0;i<contigCount;i++){
+        index[i] = new bool[contigCount];
+        for(j=0;j<contigCount;j++){
+            index[i][j] = false;
+        }   
+    }
+    
+    long int edgeNumber = 0;
+    
+    char * outputFile = new char[20];
+    strcpy(outputFile, "G1.fa");
+    
+    ofstream ocout;
+    ocout.open(outputFile);
+  
+    ScaffoldEdge * tempEdge = NULL;
+    for(i =0; i<contigCount; i++){
+        long int a = 0;
+        while(a<=1){
+            if(a==0){
+                tempEdge = scaffoldGraph[i].outLink;
+            }else{
+                tempEdge = scaffoldGraph[i].inLink;
+            }
+            
+            while(tempEdge != NULL){
+                if(tempEdge->edgeWeight >= cutoff){
+                    if(tempEdge->mapPosition->orientation != tempEdge->mapPosition->mateOrientation && index[i][tempEdge->contigIndex] == false){
+                        ocout<<">"<<edgeNumber<<endl;
+                        ocout<<contigSet[i].contig;
+                        for(j =0;j<tempEdge->gapDistance;j++){
+                            ocout<<"N";
+                        }
+                        ocout<<contigSet[tempEdge->contigIndex].contig<<endl;
+                        edgeNumber++;
+                        index[i][tempEdge->contigIndex] = true;
+                        index[tempEdge->contigIndex][i] = true;
+                    }
+                    if(tempEdge->mapPosition->orientation == tempEdge->mapPosition->mateOrientation && index[i][tempEdge->contigIndex] == false){
+                        ocout<<">"<<edgeNumber<<endl;
+                        ocout<<contigSet[i].contig;
+                        for(j =0;j<tempEdge->gapDistance;j++){
+                              ocout<<"N";
+                        }
+                        char * tempChar1 = new char[strlen(contigSet[tempEdge->contigIndex].contig)+1];
+                        ReverseComplement(contigSet[tempEdge->contigIndex].contig, tempChar1);
+                        ocout<<tempChar1<<endl;
+                        edgeNumber++;
+                        index[i][tempEdge->contigIndex] = true;
+                        index[tempEdge->contigIndex][i] = true;
+                    }
+                }
+                tempEdge = tempEdge->next;
+            }   
+            a++;
+        }
+        
+    }
+    
+} 
+
 
 int AddShortContigToScaffoldSet(ScaffoldSet * scaffoldSet, long int contigCount, bool * index){
     
@@ -2855,11 +3136,97 @@ void WriteScaffoldGraph(ScaffoldGraph * scaffoldGraph, bool * contigOrientation,
     
 }
 
+double * weightOrder(ScaffoldGraph * scaffoldGraph, long int contigCount){
+    long int i = 0;
+    long int j = 0;
+    
+    long int edgeNumber = 0;
+    
+    ScaffoldEdge * tempEdge = NULL;
+        
+    for(long int t = 0; t<contigCount; t++){
+        for(long int p = 0; p<2;p++){
+            if(p==0){
+                tempEdge = scaffoldGraph[t].outLink;
+            }else{
+                tempEdge = scaffoldGraph[t].inLink;
+            }
+            
+            while(tempEdge!=NULL){
+                edgeNumber++;
+                tempEdge = tempEdge->next;
+            }
+                
+        }    
+    } 
+    
+    double * weight = new double[edgeNumber];
+    for(long int t = 0; t<contigCount; t++){
+        for(long int p = 0; p<2;p++){
+            if(p==0){
+                tempEdge = scaffoldGraph[t].outLink;
+            }else{
+                tempEdge = scaffoldGraph[t].inLink;
+            }
+            
+            while(tempEdge!=NULL){
+                weight[i] = tempEdge->fitNumber;
+               
+                i++;
+                tempEdge = tempEdge->next;
+            }
+                
+        }    
+    } 
+    
+    
+    
+    for(i=0;i<edgeNumber-1;i++){
+        for(j=i;j<edgeNumber;j++){
+            if(weight[i]<weight[j]){
+                double temp = weight[i];
+                weight[i] = weight[j];
+                weight[j] = temp;
+            }
+        }
+    }
+    
+    double * order = new double[10];
+    long int interval = edgeNumber/10;
+    //cout<<"interval--"<<interval<<endl;
+    j=1;
+    for(i=0;i<edgeNumber;i++){
+        if(i==j*interval){
+            order[j-1] = weight[i-1];
+            //cout<<"order--"<<order[j-1]<<endl;
+            j++;    
+        }
+    }
+    order[9] = weight[edgeNumber-1];
+    //cout<<"order--"<<order[9]<<endl;
+    
+    //cout<<"25%=="<<weight[(long int)(edgeNumber*0.75)]<<endl;
+    //cout<<"30%=="<<weight[(long int)(edgeNumber*0.7)]<<endl;
+    //cout<<"20%=="<<weight[(long int)(edgeNumber*0.8)]<<endl;
+    //cout<<"21%=="<<weight[(long int)(edgeNumber*0.79)]<<endl;
+    //cout<<"22%=="<<weight[(long int)(edgeNumber*0.78)]<<endl;
+    //cout<<"23%=="<<weight[(long int)(edgeNumber*0.77)]<<endl;
+    //cout<<"24%=="<<weight[(long int)(edgeNumber*0.76)]<<endl;
+    
+    delete [] weight;
+    weight = NULL;
+    return order;
+    
+    
+    
+}
+
 ScaffoldSet * OptimizeScaffoldSet(ContigSet * contigSet, ScaffoldSet * scaffoldSet, ScaffoldGraph * scaffoldGraph, long int & contigCount, long int realContigCount, long int * contigLength, long int insertsize, long int std, long int lambda){
     
     long int i = 0;
     long int j = 0;
     long int contigLengthCutOff = insertsize + lambda*std;
+    
     
     allContigLength = 0;
     for(i=0;i<contigCount;i++){
@@ -2881,11 +3248,16 @@ ScaffoldSet * OptimizeScaffoldSet(ContigSet * contigSet, ScaffoldSet * scaffoldS
     
     long int conflictOrientation = 1;
     i = 0;
+    bool last = false;
     
     double minScore = 0.9;
-     
+    time_t timep;
+    time(&timep);
     while(minScore > 0.0001){
-        conflictOrientation = DetermineOrientationOfContigs(scaffoldGraph, contigCount, contigOrientation, visitedIndex, minScore);
+        if(minScore<0.11){
+            last = true;
+        }
+        conflictOrientation = DetermineOrientationOfContigs(scaffoldGraph, contigCount, contigOrientation, visitedIndex, minScore, last);
         if(conflictOrientation == -1){
             break;
         }
@@ -2945,7 +3317,7 @@ ScaffoldSet * OptimizeScaffoldSet(ContigSet * contigSet, ScaffoldSet * scaffoldS
             tempEdge = tempEdge->next;
         }
     }
- 
+    
     SubGraph * subGraph = DFSTranverseScaffoldGraph(scaffoldGraph,contigCount,contigOrientation);
     SubGraph * reachableNode = ReachableNode(scaffoldGraph, contigOrientation,contigCount,0);
     RemovePositionOverlap(scaffoldGraph,subGraph,reachableNode,contigCount,contigPosition);
@@ -2961,6 +3333,7 @@ ScaffoldSet * OptimizeScaffoldSet(ContigSet * contigSet, ScaffoldSet * scaffoldS
     subGraph = DFSTranverseScaffoldGraph(scaffoldGraph,contigCount,contigOrientation);
     reachableNode = ReachableNode(scaffoldGraph, contigOrientation,contigCount,1);
     RemovePositionOverlap(scaffoldGraph,subGraph,reachableNode,contigCount,contigPosition);
+    
     
     bool * index = new bool[contigCount];
     long int tempContigCount = contigCount;
@@ -2999,7 +3372,6 @@ ScaffoldSet * OptimizeScaffoldSet(ContigSet * contigSet, ScaffoldSet * scaffoldS
         tt = ss;
         ss = ss->next;
     }
-    
     
     MergeTwoScaffoldSet(scaffoldSet, contigCount, tempScaffoldSet);
 
