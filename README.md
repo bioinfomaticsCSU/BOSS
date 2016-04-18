@@ -42,11 +42,11 @@ Type "g++ main.cpp scaffoldgraph.cpp scaffolding.cpp -o boss ./lp/liblpsolve55.a
 
 Run command line: 
 
-"boss contigs.fa bamfile read_length insert_size std min_weight min_number min_cov_time is_paired_end scaffold_file_name"
+"boss contigs.fa bamfile_left.bam bamfile_right.bam read_length insert_size std min_weight min_number is_paired_end scaffold_file_name"
 
 contigs.fa is the file includes contigs produced by one assembler.
 
-bamfile is the prefix of two mapping files. Before scaffolding, users should using one mapping tool(bowtie2, bwa or bowtie) to map left read file and right read file to contigs respectively, and this will produce two bam files which should be named "bamfile_1" and "bamfile_2".
+bamfile_left.bam and bamfile_right.bam are two bam files. Before scaffolding, users should using one mapping tool(bowtie2, bwa or bowtie) to map left read file and right read file to contigs respectively, and this will produce the two bam files.
 
 read_length is the length of read.
 
