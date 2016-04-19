@@ -52,11 +52,11 @@ read_length is the length of read.
 
 insert_size is the insert size of read library.
 
-std is standard deviation of insert size (such as, std = 0.1*insert_size).
+std is standard deviation of insert size (such as, std = a*insert_size, 0.05<a<0.1).
 
-min_weight is one cutoff for removing suprious edgs in scaffold graph (such as, min_weight = 0.3).
+min_weight is one cutoff for removing suprious edgs in scaffold graph (such as, min_weight = 0.2).
 
-min_number is the minimum number of links between contigs (such as, min_number = 3).
+min_number is the minimum number of links between contigs (such as, min_number = 2).
 
 is_paired_end is 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired.
 
