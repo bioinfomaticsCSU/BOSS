@@ -96,7 +96,7 @@ Scaffolder: BOSS
 
 5) Example:
 
-	(a). If there are one read library:
+	(a). If there is one read library:
 	./boss contigs.fa left.bam right.bam 76 650 0.07 0.2 2 0 0 result
 	This command will produce the scaffolding result: result_ScaffoldSet.fa
 	
