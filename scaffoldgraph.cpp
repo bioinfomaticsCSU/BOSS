@@ -548,11 +548,11 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
         p = edgeCount/p;
     }else{
         //p1 = p1/(double)edgeCount;
-        //if(p == 0 && edgeCount == 0){
-            //p = 0;
-        //}else{
+        if(p == 0 && edgeCount == 0){
+            p = 0;
+        }else{
             p = p/edgeCount;
-        //}
+        }
     }
     
     fitD = 1;
@@ -715,11 +715,11 @@ double MapFitDistribution1(long int * index, long int * noMapIndex, MapPosition 
         p = edgeCount/p;
     }else{
         //p1 = p1/(double)edgeCount;
-        //if(p == 0 && edgeCount == 0){
-            //p = 0;
-        //}else{
+        if(p == 0 && edgeCount == 0){
+            p = 0;
+        }else{
             p = p/edgeCount;
-        //}
+        }
     }
     
     fitD = 1; 
@@ -1203,7 +1203,7 @@ long int GetGapDistance(long int * distance, long int count, long int insertsize
 }
 
 
-void * EqualScaffoldEdge(ScaffoldGraph * scaffoldGraph, long int contigCount){
+void * EqualScaffoldEdge(ScaffoldGraph * scaffoldGraph, long int contigCount, bool edgeWeightMethod){
     long int i = 0;
     long int j = 0;
     long int index = -1;
@@ -1227,8 +1227,13 @@ void * EqualScaffoldEdge(ScaffoldGraph * scaffoldGraph, long int contigCount){
             }
             while(temp1!=NULL){
                 if(temp1->contigIndex==i){
-                    temp1->fitNumber = (temp1->fitNumber + temp->fitNumber)/2;
-                    temp->fitNumber = temp1->fitNumber;
+                    if(edgeWeightMethod == false){
+                        temp1->fitNumber = (temp1->fitNumber + temp->fitNumber)/2;
+                        temp->fitNumber = temp1->fitNumber;
+                    }else{
+                        temp1->fitNumber = sqrt(temp1->fitNumber*temp->fitNumber);
+                        temp->fitNumber = temp1->fitNumber;
+                    }
                     break;
                 }
                 temp1 = temp1->next;
@@ -1436,7 +1441,7 @@ long int FindScaffoldGraphIndexOfScaffoldSet(ScaffoldSet * scaffoldSet, long int
 }
 
 
-int OptimizeScaffoldGraph(ScaffoldGraph * scaffoldGraph, long int contigCount, long int readLength, long int insertsize, long int std, long int contigCutOff, double score){
+int OptimizeScaffoldGraph(ScaffoldGraph * scaffoldGraph, long int contigCount, long int readLength, long int insertsize, long int std, long int contigCutOff, bool edgeWeightMethod){
     
     long int i = 0;
     long int j = 0;
@@ -1458,7 +1463,7 @@ int OptimizeScaffoldGraph(ScaffoldGraph * scaffoldGraph, long int contigCount, l
         rightOrientation[i] = false;       
     }
       
-    EqualScaffoldEdge(scaffoldGraph,contigCount);
+    EqualScaffoldEdge(scaffoldGraph,contigCount,edgeWeightMethod);
        
     for(i=0;i<contigCount;i++){
         ScaffoldEdge * temp = scaffoldGraph[i].outLink;

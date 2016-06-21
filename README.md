@@ -30,41 +30,77 @@ CHINA, 410083
 Scaffolder: BOSS
 =================
 
-1)Installing.
+1) Introduction
 
-BOSS is written C++ and therefore will require a machine with GNU C++ pre-installed.
+	BOSS is an scaffolder which aims to determine the orientations and orders of contigs. 
+	The contigs can be produced by any assembler.
 
-Create a main directory (eg:BOSS). Copy all source code to this directory.
+2) Before installing and running
+	
+	Before scaffolding, users should use one mapping tool to map left read library and right read libray to contigs.
+	BOSS needs the bam files as input file, which can be produced by following commands:
+	
+	(a) Mapping tool: Bowtie2
+	./bowtie2-build contigs.fa contigs
+	./bowtie2 -x contigs left.fastq -S left.sam
+	./bowtie2 -x contigs right.fastq -S right.sam
+	./samtools view -Sb left.sam > left.bam
+	./samtools view -Sb right.sam > right.bam
+	
+	(b) Mapping tool: Bowtie
+	./bowtie-build contigs.fa contigs
+	./bowtie -v 3 -q contigs left.fastq -S left.sam (or ./bowtie -v 0 -q contigs left.fastq -S left.sam)
+	./bowtie -v 3 -q contigs right.fastq -S right.sam (or ./bowtie -v 0 -q contigs right.fastq -S right.sam)
+	./samtools view -Sb left.sam > left.bam
+	./samtools view -Sb right.sam > right.bam
+	
+	(c) Mapping tool: BWA
+	./bwa index contigs.fa
+	./bwa mem contigs.fa left.fastq > left.sam
+	./bwa mem contigs.fa right.fastq > right.sam
+	./samtools view -Sb left.sam > left.bam
+	./samtools view -Sb right.sam > right.bam
 
-Type "g++ main.cpp scaffoldgraph.cpp scaffolding.cpp -o boss ./lp/liblpsolve55.a -lm -ldl -I include/ -L lib/ -lbamtools" 
+3) Installing.
 
-2)Running.
+	BOSS is written C++ and therefore will require a machine with GNU C++ pre-installed.
+	Create a main directory (eg:BOSS). Copy all source code to this directory.
+	Type "g++ main.cpp scaffoldgraph.cpp scaffolding.cpp -o boss ./lp/liblpsolve55.a -lm -ldl -I include/ -L lib/ -lbamtools" 
 
-Run command line: 
+4) Running.
 
-"boss contigs.fa bamfile_left.bam bamfile_right.bam read_length insert_size std min_weight min_number is_paired_end scaffold_file_name"
+	Run command line: 
+	"boss <contigs.fa> <bamfile_left.bam> <bamfile_right.bam> <read_length> <insert_size> <std> <min_weight> <min_number> <is_paired_end> <edge_weight_method> <scaffold_file_name>"
+	<contigs.fa>: 
+		The file includes contigs produced by one assembler.
+	<bamfile_left.bam>:
+		Before scaffolding, users should using one mapping tool(bowtie2, bwa or bowtie) to map left read library to contigs, and this will produce the bamfile_left.bam.
+	<bamfile_right.bam>:
+		Before scaffolding, users should using one mapping tool(bowtie2, bwa or bowtie) to map right read library to contigs, and this will produce the bamfile_right.bam.
+	<read_length>: 
+		The length of read.
+	<insert_size>: 
+		The insert size of read library.
+	<std_percentage>: 
+		The percentage of standard deviation to insert size, std = insert_size*std_percentage. In default, std_percentage = 0.07.
+	<min_weight>: 
+		One cutoff for removing suprious edgs in the scaffold graph. In default, min_weight = 0.2.
+	<min_number>: 
+		the minimum number of links between contigs. In default, min_number = 2.
+	<is_paired_end>: 
+		it is equal to 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired library.
+	<edge_weight_method>: 
+		it is equal to 0 or 1, 0 represents that the edge weight calculated by arithmetic mean, 1 represents that the edge weight calculated by geometric mean.
+	<scaffold_file_name>: 
+		the output file name, this file includes scaffolds produced by BOSS. 
 
-contigs.fa is the file includes contigs produced by one assembler.
+5) Example:
 
-bamfile_left.bam and bamfile_right.bam are two bam files. Before scaffolding, users should using one mapping tool(bowtie2, bwa or bowtie) to map left read file and right read file to contigs respectively, and this will produce the two bam files.
-
-read_length is the length of read.
-
-insert_size is the insert size of read library.
-
-std is standard deviation of insert size (such as, std = a*insert_size, 0.05<a<0.1).
-
-min_weight is one cutoff for removing suprious edgs in scaffold graph (such as, min_weight = 0.2).
-
-min_number is the minimum number of links between contigs (such as, min_number = 2).
-
-is_paired_end is 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired.
-
-scaffold_file_name is the output file name, this file includes scaffolds produced by BOSS. 
-
-If there two read libraries, the command line:
-"boss contigs.fa bamfile1_left.bam bamfile1_2.bam read_length1 insert_size1 std1 min_weight1 min_number1 is_paired_end1 bamfile2_left.bam bamfile2_right.bam read_length2 insert_size2 std2 min_weight2 min_number2 is_paired_end2 scaffold_file_name"
-
-3)Output.
-
-scaffold_file_name is the file (fasta format) which includes scaffolds produced by BOSS.
+	(a). If there are one read library:
+	./boss contigs.fa left.bam right.bam 76 650 0.07 0.2 2 0 0 result
+	This command will produce the scaffolding result: result_ScaffoldSet.fa
+	
+	(b). If there are two read libraries:
+	./boss contigs.fa left1.bam right1.bam 76 650 0.07 0.2 2 0 0 left2.bam right2.bam 75 2700 0.07 0.2 2 0 0 result_com
+	This command will produce the scaffolding result: result_com_ScaffoldSet.fa
+	

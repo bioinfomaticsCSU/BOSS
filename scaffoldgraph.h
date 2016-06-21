@@ -32,6 +32,7 @@ typedef struct InputArg{
     double minEdgeLinkNumber;
     double minRepetitiveCov;
     bool pairedRead;
+    bool edgeMeanMethod;
     InputArg(){
         bamFileName1 = NULL;
         bamFileName2 = NULL;
@@ -42,6 +43,7 @@ typedef struct InputArg{
         minEdgeLinkNumber = 0;
         minRepetitiveCov = 0;
         pairedRead = false;
+        edgeMeanMethod = false;
     }
 }InputArg;
 
@@ -226,7 +228,7 @@ int ComputeTruePairedMapping(BamAlignment * alignment, long int len, long int le
 int ComputeTruePairedMapping(PairedReadMappedData * alignment, long int readLength, long int insertsize, long int std);
 MapPosition * OptimizeMapPosition(MapPosition * mapPosition, long int & edgeWeight);
 long int GetGapDistance(long int * distance, long int count, long int insertsize);
-int OptimizeScaffoldGraph(ScaffoldGraph * scaffoldGraph, long int contigCount, long int readLength, long int insertsize, long int std, long int contigCutOff, double score);
+int OptimizeScaffoldGraph(ScaffoldGraph * scaffoldGraph, long int contigCount, long int readLength, long int insertsize, long int std, long int contigCutOff, bool edgeWeightMethod);
 void * EqualScaffoldEdge(ScaffoldGraph * scaffoldGraph, long int contigCount);
 
 ScaffoldEdge * SearchScaffoldGraphEdge(ScaffoldEdge * scaffoldEdge, long int contigIndex);
