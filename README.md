@@ -86,13 +86,13 @@ Scaffolder: BOSS
 	<min_weight>: 
 		One cutoff for removing suprious edgs in the scaffold graph. In default, min_weight = 0.2.
 	<min_number>: 
-		the minimum number of links between contigs. In default, min_number = 2.
+		The minimum number of links between contigs. In default, min_number = 2.
 	<is_paired_end>: 
-		it is equal to 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired library.
+		It is equal to 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired library.
 	<edge_weight_method>: 
-		it is equal to 0 or 1, 0 represents that the edge weight calculated by arithmetic mean, 1 represents that the edge weight calculated by geometric mean.
+		It is equal to 0 or 1, 0 represents that the edge weight calculated by arithmetic mean, 1 represents that the edge weight calculated by geometric mean.
 	<scaffold_file_name>: 
-		the output file name, this file includes scaffolds produced by BOSS. 
+		The output file name, this file includes scaffolds produced by BOSS. 
 
 5) Example:
 
