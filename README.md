@@ -65,7 +65,7 @@ Scaffolder: BOSS
 
 	BOSS is written C++ and therefore will require a machine with GNU C++ pre-installed.
 	Create a main directory (eg:BOSS). Copy all source code to this directory.
-	Type "g++ main.cpp scaffoldgraph.cpp scaffolding.cpp -o boss ./lp/liblpsolve55.a -lm -ldl -I include/ -L lib/ -lbamtools" 
+	Type "make all" 
 
 4) Running.
 
