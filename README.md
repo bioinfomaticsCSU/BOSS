@@ -84,9 +84,9 @@ Scaffolder: BOSS
 	<std_percentage>: 
 		The percentage of standard deviation to insert size, std = insert_size*std_percentage. In default, std_percentage = 0.07.
 	<min_weight>: 
-		One cutoff for removing suprious edgs in the scaffold graph. In default, min_weight = 0.2.
+		One cutoff for removing suprious edgs in the scaffold graph. In default, min_weight = 0.2. If the coverage is larger than 100, the value of min_weight can set to be 0.3 or more large. Note that, min_weight is smaller than 1.
 	<min_number>: 
-		The minimum number of links between contigs. In default, min_number = 2.
+		The minimum number of links between contigs. In default, min_number = 2. If the coverage is larger than 100, the value of min_number can set to be 3 or more large.
 	<is_paired_end>: 
 		It is equal to 0 or 1, 1 represents that read library is paired-end library, 0 represents that read library is mate-paired library.
 	<edge_weight_method>: 
