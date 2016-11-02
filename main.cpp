@@ -121,8 +121,10 @@ int main(int argc, char *argv[]){
         
         OptimizeScaffoldGraph((scaffoldGraphHead+i)->scaffoldGraph, scaffoldCount, inputArg[i].readLength, inputArg[i].insertsize, inputArg[i].std, inputArg[i].insertsize+lambda*inputArg[i].std, inputArg[i].edgeMeanMethod);
         
-        scaffoldSet = OptimizeScaffoldSet(contigSet, scaffoldSet, (scaffoldGraphHead+i)->scaffoldGraph, scaffoldCount, contigCount, contigLength, inputArg[i].insertsize, inputArg[i].std, lambda);
-        
+        ScaffoldSet * tempScaffoldSet = OptimizeScaffoldSet(contigSet, scaffoldSet, (scaffoldGraphHead+i)->scaffoldGraph, scaffoldCount, contigCount, contigLength, inputArg[i].insertsize, inputArg[i].std, lambda);
+        if(tempScaffoldSet != NULL){
+            scaffoldSet = tempScaffoldSet;
+        }
     }
     
     OutPutScaffoldSet(scaffoldSet, contigSet, contigCount, argv[argc-1]);

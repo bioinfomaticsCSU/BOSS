@@ -454,7 +454,7 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
     i = 0;
     MapPosition * temp11 = tempMapPosition;
     while(tempMapPosition!=NULL){
-        if(gap+distance[i]<=insertsize+lambda*std && gap+distance[i]>=insertsize-lambda*std && length - tempMapPosition->pos - 1 < insertsize + lambda*std+1 && length - tempMapPosition->pos >= 0){
+        if(gap+distance[i]<=insertsize+lambda*std && gap+distance[i]>=insertsize-lambda*std && length - tempMapPosition->pos - 1 < insertsize + lambda*std+1 && length - tempMapPosition->pos -1 >= 0){
             realCount[length - tempMapPosition->pos - 1]++;
             edgeCount++;
         }
@@ -472,7 +472,7 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
     j = 0; 
     long int avgDistanceT = 0;
     while(temp11!=NULL){
-        if(gap+distance[i]<=insertsize+lambda*std && gap+distance[i]>=insertsize-lambda*std && length - temp11->pos - 1 < insertsize + lambda*std+1 && length - temp11->pos >= 0){
+        if(gap+distance[i]<=insertsize+lambda*std && gap+distance[i]>=insertsize-lambda*std && length - temp11->pos - 1 < insertsize + lambda*std+1 && length - temp11->pos - 1 >= 0){
             distanceT[j] = distance[i];
             avgDistanceT = distanceT[j] + avgDistanceT;
             j++;

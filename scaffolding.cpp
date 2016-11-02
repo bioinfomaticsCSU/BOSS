@@ -3344,7 +3344,9 @@ ScaffoldSet * OptimizeScaffoldSet(ContigSet * contigSet, ScaffoldSet * scaffoldS
     char * tempFileName = new char[100];
     
     ScaffoldSet * tempScaffoldSet = GetScaffoldSet(scaffoldGraph,contigCount,contigLengthCutOff);     
-    
+    if(tempScaffoldSet == NULL){
+        return NULL;
+    }
     InsertShortContigInScaffoldSet(scaffoldGraph, tempScaffoldSet, contigCount, contigLengthCutOff);
     
     for(j=0;j<1;j++){        
