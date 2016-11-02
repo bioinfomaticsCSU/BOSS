@@ -17,6 +17,7 @@ scaffolding.o: scaffolding.cpp scaffoldgraph.h scaffolding.h
 	
 
 all: boss
+	rm -f *.o
 
 clean:
 	rm -f *.o
