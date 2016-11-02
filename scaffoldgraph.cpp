@@ -312,6 +312,17 @@ ContigSet * GetContigSet(char * str, long int & contigNum){
     while(icin.getline(temp,maxContigLength)){
         if(temp[0]=='>'){
             contigNum++;
+        }else{
+            long int t = 0;
+            long int len = strlen(temp);
+            for(t = 0; t < len; t++){
+                if(temp[t]!='n' && temp[t]!='N'){
+                    break;
+                }
+            }
+            if(t==len){
+                contigNum--;
+            }
         }
     }  
     icin.close();
@@ -326,6 +337,16 @@ ContigSet * GetContigSet(char * str, long int & contigNum){
             continue;
         }
         long int len = strlen(temp);
+        long int t = 0;
+        for(t = 0; t < len; t++){
+            if(temp[t]!='n' && temp[t]!='N'){
+                break;
+            }
+        }
+        if(t==len){
+            i--;
+            continue;
+        }
         if(contigSet[i].contig==NULL){
             contigSet[i].contig = new char[len+1];
             CopyContig(contigSet[i].contig,temp);
