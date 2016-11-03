@@ -463,6 +463,10 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
     }
     
     if(edgeCount == 0){
+        delete [] realCount;
+        delete [] expectCount;
+        delete [] expectPro;
+        delete [] realPro;
         return 0;
     }
     
@@ -633,6 +637,10 @@ double MapFitDistribution1(long int * index, long int * noMapIndex, MapPosition 
     }
     
     if(edgeCount == 0){
+        delete [] realCount;
+        delete [] expectCount;
+        delete [] expectPro;
+        delete [] realPro;
         return 0;
     }
     
@@ -1843,17 +1851,8 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
     long int j = 0;
     ReadMapPosition * readMapPosition = new ReadMapPosition[scaffoldCount];
     
-    bool * printContigIndex = new bool[scaffoldCount];
-    
-    
-    long int * peMapped = new long int[scaffoldCount];
-    long int * noPeMapped = new long int[scaffoldCount];
-    long int * noDistancePeMapped = new long int[scaffoldCount];
-    double * mappedRate = new double[scaffoldCount];
-    
     for(i=0;i<scaffoldCount;i++){
         RefLength = scaffoldLength[i]; 
-        readMapPosition[i].index = new long int[RefLength];
         readMapPosition[i].leftIndex = new long int[RefLength];
         readMapPosition[i].rightIndex = new long int[RefLength];
         readMapPosition[i].noMapRightIndex = new long int[RefLength];
@@ -1861,7 +1860,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
         readMapPosition[i].leftReadCoverage = new long int[RefLength];
         readMapPosition[i].rightReadCoverage = new long int[RefLength];
         for(j=0;j<RefLength;j++){
-            readMapPosition[i].index[j] = 0;
             readMapPosition[i].leftIndex[j] = 0;
             readMapPosition[i].rightIndex[j] = 0;
             readMapPosition[i].noMapRightIndex[j] = 0;
@@ -1872,28 +1870,11 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
         
         scaffoldGraph[i].length = RefLength;
         allContigLength = allContigLength + RefLength;
-        printContigIndex[i] = false;
-        peMapped[i] = 0;
-        noPeMapped[i] = 0;
-        noDistancePeMapped[i] = 0;
-        mappedRate[i] = 0;
     }
-    
-    
-    
-    std::vector<int> clipSizes;
-    std::vector<int> readPositions;
-    std::vector<int> genomePositions;
-    bool usePadded = false;
     
     
     i = 0;
     j = 0;
-    
-    
-    long int possionLeftAllMappedCount = 0;
-    long int possionRightAllMappedCount = 0;
-    long int possionAllMappedCount = 0;
     
     while(bamReader.GetNextAlignmentCore(alignment)){
         
@@ -2059,9 +2040,7 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
             allMappedReadNumber++;
             RefID = allPairedReadMappedData[i].leftReference;
             Position = allPairedReadMappedData[i].leftPosition;
-            Orientation = allPairedReadMappedData[i].orientationLeft;
-            readMapPosition[RefID].index[Position]++; 
-            possionAllMappedCount++;        
+            Orientation = allPairedReadMappedData[i].orientationLeft;  
             if(Orientation==0){
                 if(allPairedReadMappedData[i].rightPosition<0){
                     readMapPosition[RefID].leftIndex[Position]++;
@@ -2075,7 +2054,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
                     
                 }
                 
-                possionLeftAllMappedCount++;
             }else{
                 
                 if(allPairedReadMappedData[i].rightPosition<0){
@@ -2089,7 +2067,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
                     }
                 }
                 
-                possionRightAllMappedCount++;
             }   
         }
         
@@ -2098,9 +2075,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
             RefID = allPairedReadMappedData[i].rightReference;
             Position = allPairedReadMappedData[i].rightPosition;
             Orientation =allPairedReadMappedData[i].orientationRight;
-            readMapPosition[RefID].index[Position]++; 
-            
-            possionAllMappedCount++;  
                     
             if(Orientation==0){
                 if(allPairedReadMappedData[i].leftPosition<0){
@@ -2114,7 +2088,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
                     }
                 }
                 
-                possionLeftAllMappedCount++;
             }else{
                 
                 if(allPairedReadMappedData[i].leftPosition<0){
@@ -2128,7 +2101,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
                     }
                 }
                 
-                possionRightAllMappedCount++;
             }   
         }    
         
@@ -2192,21 +2164,13 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
         i++;
         
     }
-
-    long int posMatch = 0;
-    long int posMatchCount = 0;
     
-    long int posMatch1 = 0;
-    long int posMatchCount1 = 0;
     
     double rightMapP = 0;//(double)posMatchCount/(double)posMatch;
     double leftMapP = 0;//(double)posMatchCount1/(double)posMatch1;
 
 
     noMappedReadRate = 1-(double)(aa+bb-2*falsePaired)/(double)(2*allReadNumber);
-    
-    //cout<<1-noMappedReadRate<<"--"<<(double)(aa+bb)/(double)(2*allReadNumber)<<endl;
-    //exit(0);
     
     for(i=0;i<scaffoldCount;i++){
         
@@ -2336,12 +2300,15 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
             
         }
     }
-    
-    
-    delete [] peMapped;
-    delete [] noPeMapped;
-    delete [] noDistancePeMapped;
-    delete [] mappedRate;
+    for(i=0;i<scaffoldCount;i++){                  
+        delete [] readMapPosition[i].leftIndex;
+        delete [] readMapPosition[i].rightIndex;
+        delete [] readMapPosition[i].noMapRightIndex;
+        delete [] readMapPosition[i].noMapLeftIndex;
+        delete [] readMapPosition[i].leftReadCoverage;
+        delete [] readMapPosition[i].rightReadCoverage;
+    }
+    delete [] readMapPosition;
     
 }
 
