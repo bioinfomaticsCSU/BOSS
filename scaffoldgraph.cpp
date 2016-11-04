@@ -428,9 +428,6 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
              
     double max = 4;
     double min = -4;
-    
-    long int continousMaxGap = 0;
-    long int tempMaxGap = 0;
      
     mapP = 0;
     
@@ -440,14 +437,10 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
     
     long int * realCount = new long int[insertsize + lambda*std+1];
     double * expectCount = new double[insertsize + lambda*std+1];
-    double * expectPro = new double[insertsize + lambda*std+1];
-    double * realPro = new double[insertsize + lambda*std+1];
     
     for(i = 0; i<insertsize +lambda*std; i++){
         realCount[i] = 0;
         expectCount[i] = 0;
-        expectPro[i] = 0;
-        realPro[i] = 0;
     }
     
     
@@ -465,51 +458,15 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
     if(edgeCount == 0){
         delete [] realCount;
         delete [] expectCount;
-        delete [] expectPro;
-        delete [] realPro;
         return 0;
     }
     
-    long int * distanceT = new long int[edgeCount+1];
-    distanceT[edgeCount] = 0;
     i = 0;
     j = 0; 
-    long int avgDistanceT = 0;
-    while(temp11!=NULL){
-        if(gap+distance[i]<=insertsize+lambda*std && gap+distance[i]>=insertsize-lambda*std && length - temp11->pos - 1 < insertsize + lambda*std+1 && length - temp11->pos - 1 >= 0){
-            distanceT[j] = distance[i];
-            avgDistanceT = distanceT[j] + avgDistanceT;
-            j++;
-        }
-        i++;
-        temp11 = temp11->next;
-    }
     
-    avgDistanceT = avgDistanceT/j;
-    
-    long int posMap = 0;
-    long int posMapCount = 0;
-    
-    
-    double bP = 1;
-    double tempBP = 0;
-    double eBP = 0;
-    double stdBP = 0;
-    double varBP = 0;
-    double allVarBP = 0;
-    
-    double aa = 0;
-    double bb = 0;
-    
-    long int allSingleMapped = 0;
-    double p1 = 0;
-    double minVarBP = 0;
-    
-    long int allNoMapped = 0;
        
     i = readLength -1;
-    long int AllEdgeCount = edgeCount;
-    AllEdgeCount = 0;
+    long int AllEdgeCount = 0;
     edgeCount = 0;
     for(i = i; i<insertsize+lambda*std-readLength -gap && i<=length -1-readLength; i++){
         
@@ -523,17 +480,9 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
             
         }
         if(tempNumber == 0){
-            tempMaxGap++;
             continue;
-        }else{
-            
         }
         AllEdgeCount++;
-        if(realCount[i]!=0 && realCount[i]+noMapIndex[length-1-i]!=index[length-1-i]){
-            aa++;
-        }else if(realCount[i]!=0){
-            bb++;
-        }
           
         max = 4;
         min = -4;
@@ -550,29 +499,13 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
             ndP = (double)F(start,end);
         }
         
-        
         expectCount[i] = (double)(1-correctP)*(index[length-1-i])*ndP;
-        
-        p1 = p1 + (double)(realCount[i])*ndP;
-        allNoMapped = allNoMapped + noMapIndex[length-1-i];
-        
         p = p + expectCount[i];
-        
-        allVarBP = allVarBP + expectCount[i]*(1-(double)(1-correctP)*ndP);
-   
-        
     }
     
-
-    long int realGap = labs(p - edgeCount);
-    
-    mapP = tempMaxGap;
-    
     if(p>edgeCount){
-        p1 = p1/(double)edgeCount;
         p = edgeCount/p;
     }else{
-        //p1 = p1/(double)edgeCount;
         if(p == 0 && edgeCount == 0){
             p = 0;
         }else{
@@ -588,9 +521,7 @@ double MapFitDistribution(long int * index, long int * noMapIndex, MapPosition *
 
     delete [] realCount;
     delete [] expectCount;
-    delete [] expectPro;
-    delete [] realPro;
-    delete [] distanceT;
+
    
 }
 
@@ -605,23 +536,15 @@ double MapFitDistribution1(long int * index, long int * noMapIndex, MapPosition 
     double max = 4;
     double min = -4;
     
-    long int continousMaxGap = 0;
-    long int tempMaxGap = 0;
-    
     mapP = 0;
     
     
     long int * realCount = new long int[insertsize + lambda*std];
     double * expectCount = new double[insertsize + lambda*std];
-    double * expectPro = new double[insertsize + lambda*std];
-    double * realPro = new double[insertsize + lambda*std];
     
     for(i = 0; i<insertsize +lambda*std; i++){
         realCount[i] = 0;
         expectCount[i] = 0;
-        expectPro[i] = 0;
-        realPro[i] = 0;
-        
     }
     
     long int edgeCount = 0;
@@ -639,52 +562,18 @@ double MapFitDistribution1(long int * index, long int * noMapIndex, MapPosition 
     if(edgeCount == 0){
         delete [] realCount;
         delete [] expectCount;
-        delete [] expectPro;
-        delete [] realPro;
         return 0;
     }
     
-    long int * distanceT = new long int[edgeCount+1];
-    distanceT[edgeCount] = 0;
+    
     i = 0;
     j = 0; 
-    long int avgDistanceT = 0;
     
-    while(temp11!=NULL){
-        if(gap+distance[i]<=insertsize+lambda*std && gap+distance[i]>=insertsize-lambda*std && temp11->pos < insertsize + lambda*std && temp11->pos >= 0){
-            distanceT[j] = distance[i];
-            avgDistanceT = avgDistanceT + distanceT[j];
-            j++;
-        }
-        i++;
-        temp11 = temp11->next;
-    }
-   
-    avgDistanceT = avgDistanceT/j;
-    
-    i = 0;
-    long int posMap = 0;
-    long int posMapCount = 0;
-    
-    double tempBP = 0;
-    double eBP = 0;
-    double stdBP = 0;
-    double varBP = 0;
-    double allVarBP = 0;
-    
-    double aa = 0;
-    double bb = 0;
-    
-    long int allSingleMapped = 0;
     double p1 = 0;
-    
-    double minVarBP = 0;
-    long int allNoMapped = 0;
-    
     i = 0;
-    long int AllEdgeCount = edgeCount;
-    AllEdgeCount = 0;
+    long int AllEdgeCount = 0;
     edgeCount = 0;
+    
     for(i = i; i<insertsize+lambda*std-readLength -gap && i<=length -1 -readLength; i++){
         
         edgeCount = edgeCount + realCount[i];
@@ -698,17 +587,10 @@ double MapFitDistribution1(long int * index, long int * noMapIndex, MapPosition 
         }
         
         if(tempNumber== 0){
-            tempMaxGap++;
             continue;
-        }else{
-            
         }
+        
         AllEdgeCount++;
-        if(realCount[i]!=0 && realCount[i]+noMapIndex[i]!=index[i]){
-            aa++;
-        }else if(realCount[i]!=0){
-            bb++;
-        }
           
         max = 4;
         min = -4;
@@ -727,23 +609,14 @@ double MapFitDistribution1(long int * index, long int * noMapIndex, MapPosition 
         
         expectCount[i] = (double)(1-correctP)*(index[i])*ndP;
        
-        p1 = p1 + (double)(realCount[i])*ndP;
-        allNoMapped = allNoMapped + noMapIndex[i];
-       
         p = p + expectCount[i];
-        
-        allVarBP = allVarBP + expectCount[i]*(1-(double)(1-correctP)*ndP);
         
         
     }
-    
-    mapP = tempMaxGap;
 
     if(p>edgeCount){
-        p1 = p1/(double)edgeCount;
         p = edgeCount/p;
     }else{
-        //p1 = p1/(double)edgeCount;
         if(p == 0 && edgeCount == 0){
             p = 0;
         }else{
@@ -757,9 +630,6 @@ double MapFitDistribution1(long int * index, long int * noMapIndex, MapPosition 
 
     delete [] realCount;
     delete [] expectCount;
-    delete [] expectPro;
-    delete [] realPro;
-    delete [] distanceT;
 }
 
 
@@ -1855,15 +1725,11 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
         RefLength = scaffoldLength[i]; 
         readMapPosition[i].leftIndex = new long int[RefLength];
         readMapPosition[i].rightIndex = new long int[RefLength];
-        readMapPosition[i].noMapRightIndex = new long int[RefLength];
-        readMapPosition[i].noMapLeftIndex = new long int[RefLength];
         readMapPosition[i].leftReadCoverage = new long int[RefLength];
         readMapPosition[i].rightReadCoverage = new long int[RefLength];
         for(j=0;j<RefLength;j++){
             readMapPosition[i].leftIndex[j] = 0;
             readMapPosition[i].rightIndex[j] = 0;
-            readMapPosition[i].noMapRightIndex[j] = 0;
-            readMapPosition[i].noMapLeftIndex[j] = 0;
             readMapPosition[i].leftReadCoverage[j] = 0;
             readMapPosition[i].rightReadCoverage[j] = 0;
         }
@@ -2044,7 +1910,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
             if(Orientation==0){
                 if(allPairedReadMappedData[i].rightPosition<0){
                     readMapPosition[RefID].leftIndex[Position]++;
-                    readMapPosition[RefID].noMapLeftIndex[Position]++;
                 }else{
                     MateRefID = allPairedReadMappedData[i].rightReference;
                     MateOrientation =allPairedReadMappedData[i].orientationRight;
@@ -2058,7 +1923,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
                 
                 if(allPairedReadMappedData[i].rightPosition<0){
                     readMapPosition[RefID].rightIndex[Position]++;
-                    readMapPosition[RefID].noMapRightIndex[Position]++;
                 }else{
                     MateRefID = allPairedReadMappedData[i].rightReference;
                     MateOrientation = allPairedReadMappedData[i].orientationRight;
@@ -2079,7 +1943,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
             if(Orientation==0){
                 if(allPairedReadMappedData[i].leftPosition<0){
                     readMapPosition[RefID].leftIndex[Position]++;
-                    readMapPosition[RefID].noMapLeftIndex[Position]++;
                 }else{
                     MateRefID = allPairedReadMappedData[i].leftReference;
                     MateOrientation = allPairedReadMappedData[i].orientationLeft;
@@ -2092,7 +1955,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
                 
                 if(allPairedReadMappedData[i].leftPosition<0){
                     readMapPosition[RefID].rightIndex[Position]++;
-                    readMapPosition[RefID].noMapRightIndex[Position]++;
                 }else{
                     MateRefID = allPairedReadMappedData[i].leftReference;
                     MateOrientation = allPairedReadMappedData[i].orientationLeft;
@@ -2278,13 +2140,13 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
                     avgP = scaffoldGraph[i].rightReadCoverage/allAverageReadCoverage;
                     avgP = 1;
                     
-                    MapFitDistribution(readMapPosition[i].rightIndex,readMapPosition[i].noMapRightIndex,tempMapPosition,tempAllDistance,noMappedReadRate,RefLength,MateRefLength,readLength,gap,insertsize, std, continousGap,temp->fitNumber,temp->fitDistribution,rightMapP,0,avgP);
+                    MapFitDistribution(readMapPosition[i].rightIndex,NULL,tempMapPosition,tempAllDistance,noMappedReadRate,RefLength,MateRefLength,readLength,gap,insertsize, std, continousGap,temp->fitNumber,temp->fitDistribution,rightMapP,0,avgP);
                     
                 }else{
                     
                     avgP = scaffoldGraph[i].leftReadCoverage/allAverageReadCoverage;
                     avgP = 1;
-                    MapFitDistribution1(readMapPosition[i].leftIndex,readMapPosition[i].noMapLeftIndex,tempMapPosition,tempAllDistance,noMappedReadRate,RefLength,MateRefLength,readLength,gap,insertsize, std, continousGap, temp->fitNumber,temp->fitDistribution,leftMapP,0,avgP);  
+                    MapFitDistribution1(readMapPosition[i].leftIndex,NULL,tempMapPosition,tempAllDistance,noMappedReadRate,RefLength,MateRefLength,readLength,gap,insertsize, std, continousGap, temp->fitNumber,temp->fitDistribution,leftMapP,0,avgP);  
                     
                 }              
                 
@@ -2303,8 +2165,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
     for(i=0;i<scaffoldCount;i++){                  
         delete [] readMapPosition[i].leftIndex;
         delete [] readMapPosition[i].rightIndex;
-        delete [] readMapPosition[i].noMapRightIndex;
-        delete [] readMapPosition[i].noMapLeftIndex;
         delete [] readMapPosition[i].leftReadCoverage;
         delete [] readMapPosition[i].rightReadCoverage;
     }
