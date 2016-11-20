@@ -1723,13 +1723,9 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
     
     for(i=0;i<scaffoldCount;i++){
         RefLength = scaffoldLength[i]; 
-        readMapPosition[i].leftIndex = new long int[RefLength];
-        readMapPosition[i].rightIndex = new long int[RefLength];
         readMapPosition[i].leftReadCoverage = new long int[RefLength];
         readMapPosition[i].rightReadCoverage = new long int[RefLength];
         for(j=0;j<RefLength;j++){
-            readMapPosition[i].leftIndex[j] = 0;
-            readMapPosition[i].rightIndex[j] = 0;
             readMapPosition[i].leftReadCoverage[j] = 0;
             readMapPosition[i].rightReadCoverage[j] = 0;
         }
@@ -1757,8 +1753,6 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
     long int cc = 0;
     long int dd = 0;
     PairedReadMappedData * allPairedReadMappedData = new PairedReadMappedData[allReadNumber];
-    long int * leftReadMapNumber = new long int[allReadNumber];
-    long int * rightReadMapNumber = new long int[allReadNumber];
     
     string leftReadName;
     string rightReadName;
@@ -1898,7 +1892,26 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
             }
         }
     }  
-
+    
+    for(i=0;i<scaffoldCount;i++){                  
+        delete [] readMapPosition[i].leftReadCoverage;
+        delete [] readMapPosition[i].rightReadCoverage;
+        readMapPosition[i].leftReadCoverage = NULL;
+        readMapPosition[i].rightReadCoverage = NULL;
+    }
+    
+    
+    for(i=0;i<scaffoldCount;i++){
+        RefLength = scaffoldLength[i]; 
+        readMapPosition[i].leftIndex = new long int[RefLength];
+        readMapPosition[i].rightIndex = new long int[RefLength];
+        for(j=0;j<RefLength;j++){
+            readMapPosition[i].leftIndex[j] = 0;
+            readMapPosition[i].rightIndex[j] = 0;
+        }
+    }
+    
+    
     i = 0;
     
     while(i<allReadNumber){
@@ -2027,6 +2040,8 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
         
     }
     
+    delete [] allPairedReadMappedData;
+    allPairedReadMappedData = NULL;
     
     double rightMapP = 0;//(double)posMatchCount/(double)posMatch;
     double leftMapP = 0;//(double)posMatchCount1/(double)posMatch1;
@@ -2137,14 +2152,14 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
 
                 if(temp->mapPosition->orientation==1){
                     
-                    avgP = scaffoldGraph[i].rightReadCoverage/allAverageReadCoverage;
+                    //avgP = scaffoldGraph[i].rightReadCoverage/allAverageReadCoverage;
                     avgP = 1;
                     
                     MapFitDistribution(readMapPosition[i].rightIndex,NULL,tempMapPosition,tempAllDistance,noMappedReadRate,RefLength,MateRefLength,readLength,gap,insertsize, std, continousGap,temp->fitNumber,temp->fitDistribution,rightMapP,0,avgP);
                     
                 }else{
                     
-                    avgP = scaffoldGraph[i].leftReadCoverage/allAverageReadCoverage;
+                    //avgP = scaffoldGraph[i].leftReadCoverage/allAverageReadCoverage;
                     avgP = 1;
                     MapFitDistribution1(readMapPosition[i].leftIndex,NULL,tempMapPosition,tempAllDistance,noMappedReadRate,RefLength,MateRefLength,readLength,gap,insertsize, std, continousGap, temp->fitNumber,temp->fitDistribution,leftMapP,0,avgP);  
                     
@@ -2165,8 +2180,8 @@ int BuildScaffoldGraphFromTwoBam(ScaffoldSet * scaffoldSet, long int * scaffoldL
     for(i=0;i<scaffoldCount;i++){                  
         delete [] readMapPosition[i].leftIndex;
         delete [] readMapPosition[i].rightIndex;
-        delete [] readMapPosition[i].leftReadCoverage;
-        delete [] readMapPosition[i].rightReadCoverage;
+        readMapPosition[i].leftIndex = NULL;
+        readMapPosition[i].rightIndex = NULL;
     }
     delete [] readMapPosition;
     
