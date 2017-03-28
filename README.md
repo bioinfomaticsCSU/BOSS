@@ -36,7 +36,7 @@ Scaffolder: BOSS
 	The contigs can be produced by any assembler.
 
 2) Before installing and running
-	
+'''	
 	Before scaffolding, users should use one mapping tool to map left read library and right read libray to contigs.
 	BOSS needs the bam files as input file, which can be produced by following commands:
 	
@@ -60,7 +60,7 @@ Scaffolder: BOSS
 	./bwa mem contigs.fa right.fastq > right.sam
 	./samtools view -Sb left.sam > left.bam
 	./samtools view -Sb right.sam > right.bam
-
+'''
 3) Installing.
 
 	BOSS is written by C++ and requires a machine with GNU C++ pre-installed.
@@ -68,7 +68,7 @@ Scaffolder: BOSS
 	Type "make all" 
 
 4) Running.
-
+'''
 	Run command line: 
 	"boss <contigs.fa> <bamfile_left.bam> <bamfile_right.bam> <read_length> <insert_size> <std> <min_weight> <min_number> <is_paired_end> <edge_weight_method> <scaffold_file_name>"
 	<contigs.fa>: 
@@ -93,7 +93,7 @@ Scaffolder: BOSS
 		It is equal to 0 or 1, 0 represents that the edge weight calculated by arithmetic mean, 1 represents that the edge weight calculated by geometric mean.
 	<scaffold_file_name>: 
 		The output file name, this file includes scaffolds produced by BOSS. 
-
+'''
 5) Example:
 
 	(a). If there is one read library:
