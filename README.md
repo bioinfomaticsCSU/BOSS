@@ -95,7 +95,7 @@ Scaffolder: BOSS
 		The output file name, this file includes scaffolds produced by BOSS. 
 ```
 5) Example:
-
+```
 	(a). If there is one read library:
 	./boss contigs.fa left.bam right.bam 76 650 0.07 0.2 2 0 0 result
 	This command will produce the scaffolding result: result_ScaffoldSet.fa
@@ -103,7 +103,7 @@ Scaffolder: BOSS
 	(b). If there are two read libraries:
 	./boss contigs.fa left1.bam right1.bam 76 650 0.07 0.2 2 0 0 left2.bam right2.bam 75 2700 0.07 0.2 2 0 0 result_com
 	This command will produce the scaffolding result: result_com_ScaffoldSet.fa
-
+```
 6）Suggestion:
 
 	When you want to enhance the accuracy of scaffolding results, please set large numbers for the parameters  <min_weight> and <min_number>;
