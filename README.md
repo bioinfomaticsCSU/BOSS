@@ -108,3 +108,6 @@ Scaffolder: BOSS
 
 	When you want to enhance the accuracy of scaffolding results, please set large numbers for the parameters  <min_weight> and <min_number>;
 	When the coverage number of paired read library is small (smaller than 30), you can try small numbers for the parameters <min_weight> and <min_number>;   
+```
+7) Evaluation:
+	You can use the tool GAGE (in the directory GAGE) or QUAST (http://bioinf.spbau.ru/quast) to evaluate results. 
