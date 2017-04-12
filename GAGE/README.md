@@ -1,0 +1,16 @@
+GAGE: assembly result evaluation tool.  （JDK 1.7 or latest version）
+
+==========
+
+Install
+
+Run: tar xvzf MUMmer3.23.tar.gz
+
+Run: cd MUMmer3.23
+
+Run: make
+
+Run: tar xvzf gage-validation.tar.gz
+
+Run: sh getCorrectnessStats.sh Reference.Fasta Contig.Fasta Scaffold.Fasta
+
