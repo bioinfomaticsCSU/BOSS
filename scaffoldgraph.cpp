@@ -304,7 +304,7 @@ ContigSet * GetContigSet(char * str, long int & contigNum){
     
     ifstream icin;
     icin.open(str);    
-    if(icin==NULL){
+    if(icin){
         cout<<"Open File Wrong!"<<endl;
         exit(0);
     }    
