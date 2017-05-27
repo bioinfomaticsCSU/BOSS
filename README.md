@@ -65,6 +65,7 @@ Scaffolder: BOSS
 
 	BOSS is written by C++ and requires a machine with GNU C++ pre-installed.
 	Create a main directory (eg:BOSS). Copy all source code to this directory.
+	Please add current path to the enviroment variable LD_LIBRARY_PATH.
 	Type "make all" 
 
 4) Running.
