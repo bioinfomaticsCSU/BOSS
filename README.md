@@ -63,7 +63,7 @@ Scaffolder: BOSS
 ```
 3) Installing.
 
-	BOSS is written by C++ and requires a machine with GNU C++ pre-installed.
+	BOSS should run on Linux operating sysetm with gcc. We test GET using gcc4.6.3 on Ubuntu.
 	Create a main directory (eg:BOSS). Copy all source code to this directory.
 	Please add current path to the enviroment variable LD_LIBRARY_PATH.
 	Type "make all" 
