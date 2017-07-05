@@ -37,6 +37,8 @@ Scaffolder: BOSS
 
 2) Before installing and running
 ```	
+	First, Please build and install bamtools from https://github.com/pezmaster31/bamtools.
+	
 	Before scaffolding, users should use one mapping tool to map left read library and right read libray to contigs.
 	BOSS needs the bam files as input file, which can be produced by following commands:
 	
@@ -63,9 +65,9 @@ Scaffolder: BOSS
 ```
 3) Installing.
 
-	BOSS should run on Linux operating sysetm with gcc. We test GET using gcc4.6.3 on Ubuntu.
+	BOSS should run on Linux operating sysetm with gcc. We test BOSS using gcc4.6.3 on Ubuntu.
 	Create a main directory (eg:BOSS). Copy all source code to this directory.
-	Please add current path to the enviroment variable LD_LIBRARY_PATH.
+	Copy /bamtools_master/lib/libbamtools.so to the directory of BOSS. 
 	Type "make all" 
 
 4) Running.
