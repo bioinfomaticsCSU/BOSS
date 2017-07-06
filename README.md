@@ -64,12 +64,14 @@ Scaffolder: BOSS
 	./samtools view -Sb right.sam > right.bam
 ```
 3) Installing.
-
+```
 	BOSS should run on Linux operating sysetm with gcc. We test BOSS using gcc4.6.3 on Ubuntu.
 	Create a main directory (eg:BOSS). Copy all source code to this directory.
-	Copy /bamtools_master/lib/libbamtools.so to the directory of BOSS. 
-	Type "make all" 
-
+	cd BOSS
+	export BAMTOOLS_HOME=/path_bamtools/
+	cp /path_bamtools/lib/* /usr/lib/
+	make all
+```
 4) Running.
 ```
 	Run command line: 
