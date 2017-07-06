@@ -34,6 +34,7 @@ Scaffolder: BOSS
 
 	BOSS is an scaffolder which aims to determine the orientations and orders of contigs. 
 	The contigs can be produced by any assembler.
+	The input read data of BOSS is paired-end or Mate-pair read set, in which the left read library and the right read library should have the same read length.
 
 2) Before installing and running
 ```	
