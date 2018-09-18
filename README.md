@@ -40,7 +40,9 @@ Scaffolder: BOSS
 ```	
 	First, Please build and install bamtools from https://github.com/pezmaster31/bamtools. 
 	
-	And add enviroment vairable "BAMTOOLS_HOME_INCLUDE" which is the path that includes two directories "api" and "shared" of bamtools. And add enviroment vairable "BAMTOOLS_HOME_LIB" which is the path that includes the file "libbamtools.so".
+	And add enviroment vairable "BAMTOOLS_HOME_INCLUDE" which is the path that includes two 
+	directories "api" and "shared" of bamtools. And add enviroment vairable "BAMTOOLS_HOME_LIB" 
+	which is the path that includes the file "libbamtools.so".
 	
 	Before scaffolding, users should use one mapping tool to map left read library and right read libray to contigs.
 	BOSS needs the bam files as input file, which can be produced by following commands:
