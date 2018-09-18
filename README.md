@@ -73,8 +73,6 @@ Scaffolder: BOSS
 	BOSS should run on Linux operating sysetm with gcc. We test BOSS using gcc4.6.3 on Ubuntu.
 	Create a main directory (eg:BOSS). Copy all source code to this directory.
 	cd BOSS
-	export BAMTOOLS_HOME=/path_bamtools/
-	cp /path_bamtools/lib/* /usr/lib/
 	make all
 ```
 4) Running.
